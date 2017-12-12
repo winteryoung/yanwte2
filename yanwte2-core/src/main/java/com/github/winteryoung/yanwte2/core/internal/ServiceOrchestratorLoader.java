@@ -104,9 +104,7 @@ public class ServiceOrchestratorLoader {
                         throw new RuntimeException(e);
                     }
                     checkNotNull(combinator);
-                    ServiceInput input = new ServiceInput(arg);
-                    ServiceOutput output = combinator.invoke(input);
-                    return output.getResult();
+                    return combinator.invoke(arg);
                 });
     }
 

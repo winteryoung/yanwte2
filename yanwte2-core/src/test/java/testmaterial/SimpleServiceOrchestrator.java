@@ -5,11 +5,11 @@ import com.github.winteryoung.yanwte2.core.spi.Combinator;
 
 /**
  * @author fanshen
- * @since 2017/12/11
+ * @since 2017/12/12
  */
-public class NormalServiceOrchestrator implements ServiceOrchestrator {
+public class SimpleServiceOrchestrator implements ServiceOrchestrator {
     @Override
     public Combinator tree() {
-        return arg -> (Integer) arg + 3;
+        return provider(SimpleServiceProvider.class);
     }
 }

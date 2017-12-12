@@ -1,4 +1,4 @@
-package com.github.winteryoung.yanwte2.core.internal;
+package scripts;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import org.assertj.core.api.Assertions;
@@ -10,9 +10,9 @@ import testmaterial.ServiceWithoutOrchestrator;
 
 /**
  * @author fanshen
- * @since 2017/12/11
+ * @since 2017/12/12
  */
-public class ServiceOrchestratorLoaderTest {
+public class ServiceOrchestratorTest {
     @Test
     public void getOrchestratorByServiceType_normal() {
         NormalService orchestrator =
@@ -21,27 +21,27 @@ public class ServiceOrchestratorLoaderTest {
     }
 
     @Test(
-        expectedExceptions = IllegalStateException.class,
-        expectedExceptionsMessageRegExp =
-                "Cannot find orchestrator for service: testmaterial.ServiceWithoutOrchestrator"
+            expectedExceptions = IllegalStateException.class,
+            expectedExceptionsMessageRegExp =
+                    "Cannot find orchestrator for service: testmaterial.ServiceWithoutOrchestrator"
     )
     public void getOrchestratorByServiceType_noOrchestratorDefined() {
         ServiceOrchestrator.getOrchestratorByServiceType(ServiceWithoutOrchestrator.class);
     }
 
     @Test(
-        expectedExceptions = IllegalArgumentException.class,
-        expectedExceptionsMessageRegExp =
-                "Service type is required to be a function: testmaterial.ServiceNotImplementFunction"
+            expectedExceptions = IllegalArgumentException.class,
+            expectedExceptionsMessageRegExp =
+                    "Service type is required to be a function: testmaterial.ServiceNotImplementFunction"
     )
     public void getOrchestratorByServiceType_serviceNotImplementFunction() {
         ServiceOrchestrator.getOrchestratorByServiceType(ServiceNotImplementFunction.class);
     }
 
     @Test(
-        expectedExceptions = IllegalArgumentException.class,
-        expectedExceptionsMessageRegExp =
-                "Service type is required to be an interface: testmaterial.NormalServiceOrchestrator"
+            expectedExceptions = IllegalArgumentException.class,
+            expectedExceptionsMessageRegExp =
+                    "Service type is required to be an interface: testmaterial.NormalServiceOrchestrator"
     )
     public void getOrchestratorByServiceType_serviceNotInterface() {
         ServiceOrchestrator.getOrchestratorByServiceType(NormalServiceOrchestrator.class);
