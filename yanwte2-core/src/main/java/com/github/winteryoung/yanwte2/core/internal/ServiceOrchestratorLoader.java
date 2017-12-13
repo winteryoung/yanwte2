@@ -60,7 +60,7 @@ public class ServiceOrchestratorLoader {
                 userDefinedOrchestrator != null,
                 "Cannot find orchestrator for service: " + serviceType.getName());
 
-        LoadingCache<Integer, Combinator> lazyTree = getLazyCombintorTree(userDefinedOrchestrator);
+        LoadingCache<Integer, Combinator> lazyTree = getLazyCombinatorTree(userDefinedOrchestrator);
 
         Class<? extends T> proxyType =
                 new ByteBuddy()
@@ -79,7 +79,7 @@ public class ServiceOrchestratorLoader {
         }
     }
 
-    private static LoadingCache<Integer, Combinator> getLazyCombintorTree(
+    private static LoadingCache<Integer, Combinator> getLazyCombinatorTree(
             ServiceOrchestrator userDefinedOrchestrator) {
         return CacheBuilder.newBuilder()
                 .build(

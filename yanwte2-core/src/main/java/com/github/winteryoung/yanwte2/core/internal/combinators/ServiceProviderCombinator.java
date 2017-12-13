@@ -1,6 +1,7 @@
 package com.github.winteryoung.yanwte2.core.internal.combinators;
 
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
+import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
 import java.net.URI;
 import java.util.function.Function;
 
@@ -12,33 +13,18 @@ public class ServiceProviderCombinator implements Combinator {
     private Function<Object, Object> provider;
 
     public ServiceProviderCombinator(URI providerURI, ClassLoader classLoader) {
-        if (classLoader == null) {
-            classLoader = Thread.currentThread().getContextClassLoader();
-        }
-
-        if (!providerURI.getScheme().toLowerCase().equals("class")) {
-            throw new IllegalStateException("Unsupported provider URI scheme: " + providerURI);
-        }
-
-        String className = providerURI.getSchemeSpecificPart();
-        Class<?> providerClass;
-        try {
-            providerClass = classLoader.loadClass(className);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (!Function.class.isAssignableFrom(providerClass)) {
-            throw new RuntimeException(
-                    "Service provider is expected to implement java.util.function.Function: "
-                            + providerClass);
+        ClassLoader backupClassLoader = null;
+        if (classLoader != null) {
+            backupClassLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(classLoader);
         }
 
         try {
-            //noinspection unchecked
-            this.provider = (Function<Object, Object>) providerClass.newInstance();
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
+            this.provider = ServiceProviderLocator.locateProvider(providerURI);
+        } finally {
+            if (backupClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(backupClassLoader);
+            }
         }
     }
 

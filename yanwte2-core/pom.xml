@@ -47,10 +47,10 @@
                 <plugins>
                     <plugin>
                         <groupId>org.jetbrains.dokka</groupId>
-                        <artifactId>dokka-maven-plugin</artifactId>
+                        <artifactId>dokka-maven-serviceProviderLocator</artifactId>
                     </plugin>
                     <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
+                        <artifactId>maven-assembly-serviceProviderLocator</artifactId>
                     </plugin>
                 </plugins>
             </build>
