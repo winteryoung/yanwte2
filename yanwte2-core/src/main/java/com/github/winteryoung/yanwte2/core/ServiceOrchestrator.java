@@ -1,10 +1,15 @@
 package com.github.winteryoung.yanwte2.core;
 
 import com.github.winteryoung.yanwte2.core.internal.ServiceOrchestratorLoader;
+import com.github.winteryoung.yanwte2.core.internal.combinators.ChainCombinator;
 import com.github.winteryoung.yanwte2.core.internal.combinators.ServiceProviderCombinator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
+import com.google.common.collect.Lists;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Winter Young
@@ -24,7 +29,12 @@ public interface ServiceOrchestrator {
         return new ServiceProviderCombinator(providerURI, providerClass.getClassLoader());
     }
 
-    static <T> T getOrchestratorByServiceType(Class<T> serviceType) {
+    default Combinator chain(Combinator... combinators) {
+        checkNotNull(combinators);
+        return new ChainCombinator(Lists.newArrayList(combinators));
+    }
+
+    static <T> T getOrchestrator(Class<T> serviceType) {
         return ServiceOrchestratorLoader.getOrchestratorByServiceType(serviceType);
     }
 }

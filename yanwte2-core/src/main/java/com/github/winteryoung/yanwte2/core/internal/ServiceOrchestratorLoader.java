@@ -99,9 +99,9 @@ public class ServiceOrchestratorLoader {
                     Combinator combinator;
                     try {
                         combinator = lazyTree.get(1);
-                    } catch (Exception e) {
-                        Throwables.throwIfUnchecked(e);
-                        throw new RuntimeException(e);
+                    } catch (ExecutionException | UncheckedExecutionException e) {
+                        Throwables.throwIfUnchecked(e.getCause());
+                        throw new RuntimeException(e.getCause());
                     }
                     checkNotNull(combinator);
                     return combinator.invoke(arg);
@@ -128,8 +128,7 @@ public class ServiceOrchestratorLoader {
                 if (ServiceOrchestrator.class.isAssignableFrom(orchestratorClass)) {
                     try {
                         return (ServiceOrchestrator) orchestratorClass.newInstance();
-                    } catch (Exception e) {
-                        Throwables.throwIfUnchecked(e);
+                    } catch (InstantiationException | IllegalAccessException e) {
                         throw new RuntimeException(e);
                     }
                 }

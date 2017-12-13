@@ -1,5 +1,6 @@
 package com.github.winteryoung.yanwte2.core.internal.combinators;
 
+import com.github.winteryoung.yanwte2.core.internal.providerns.CurrentThreadProviderNamespace;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
 import java.net.URI;
@@ -11,6 +12,7 @@ import java.util.function.Function;
  */
 public class ServiceProviderCombinator implements Combinator {
     private Function<Object, Object> provider;
+    private String providerNamespace;
 
     public ServiceProviderCombinator(URI providerURI, ClassLoader classLoader) {
         ClassLoader backupClassLoader = null;
@@ -26,10 +28,17 @@ public class ServiceProviderCombinator implements Combinator {
                 Thread.currentThread().setContextClassLoader(backupClassLoader);
             }
         }
+
+        this.providerNamespace = provider.getClass().getPackage().getName();
     }
 
     @Override
     public Object invoke(Object arg) {
-        return provider.apply(arg);
+        try {
+            CurrentThreadProviderNamespace.set(providerNamespace);
+            return provider.apply(arg);
+        } finally {
+            CurrentThreadProviderNamespace.set(null);
+        }
     }
 }
