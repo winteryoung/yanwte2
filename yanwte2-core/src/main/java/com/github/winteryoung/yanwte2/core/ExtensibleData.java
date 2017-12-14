@@ -1,19 +1,19 @@
 package com.github.winteryoung.yanwte2.core;
 
 import com.github.winteryoung.yanwte2.core.internal.providerns.CurrentThreadProviderNamespace;
-import com.github.winteryoung.yanwte2.core.internal.providerns.DataExtensionCache;
+import com.github.winteryoung.yanwte2.core.internal.providerns.DataExtensions;
 
 /**
  * @author Winter Young
  * @since 2017/12/13
  */
 public interface ExtensibleData {
-    default <T> T getDataExtension() {
+    default <T> T getDataExt() {
         //noinspection unchecked
-        return (T) DataExtensionCache.get(this, CurrentThreadProviderNamespace.get());
+        return (T) DataExtensions.get(this, CurrentThreadProviderNamespace.get());
     }
 
-    default void setDataExtension(Object extension) {
-        DataExtensionCache.put(this, CurrentThreadProviderNamespace.get(), extension);
+    default void setDataExt(Object extension) {
+        DataExtensions.put(this, CurrentThreadProviderNamespace.get(), extension);
     }
 }

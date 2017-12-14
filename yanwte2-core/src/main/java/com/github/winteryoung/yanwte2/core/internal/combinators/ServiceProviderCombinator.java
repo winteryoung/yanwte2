@@ -14,21 +14,8 @@ public class ServiceProviderCombinator implements Combinator {
     private Function<Object, Object> provider;
     private String providerNamespace;
 
-    public ServiceProviderCombinator(URI providerURI, ClassLoader classLoader) {
-        ClassLoader backupClassLoader = null;
-        if (classLoader != null) {
-            backupClassLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader(classLoader);
-        }
-
-        try {
-            this.provider = ServiceProviderLocator.locateProvider(providerURI);
-        } finally {
-            if (backupClassLoader != null) {
-                Thread.currentThread().setContextClassLoader(backupClassLoader);
-            }
-        }
-
+    public ServiceProviderCombinator(URI providerURI) {
+        this.provider = ServiceProviderLocator.locateProvider(providerURI);
         this.providerNamespace = provider.getClass().getPackage().getName();
     }
 

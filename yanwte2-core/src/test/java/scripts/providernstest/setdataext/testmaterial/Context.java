@@ -1,4 +1,4 @@
-package scripts.providernstest.testmaterial.onens;
+package scripts.providernstest.setdataext.testmaterial;
 
 import com.github.winteryoung.yanwte2.core.ExtensibleData;
 

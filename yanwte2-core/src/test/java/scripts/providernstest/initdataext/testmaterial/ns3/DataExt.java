@@ -1,4 +1,4 @@
-package scripts.providernstest.testmaterial.onens.ns1;
+package scripts.providernstest.initdataext.testmaterial.ns3;
 
 /**
  * @author Winter Young

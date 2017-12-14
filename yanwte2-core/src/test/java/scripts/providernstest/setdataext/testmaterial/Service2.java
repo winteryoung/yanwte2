@@ -1,4 +1,4 @@
-package scripts.providernstest.testmaterial.onens;
+package scripts.providernstest.setdataext.testmaterial;
 
 import java.util.function.Function;
 

@@ -1,7 +1,7 @@
-package scripts.providernstest.testmaterial.onens.ns1;
+package scripts.providernstest.setdataext.testmaterial.ns1;
 
-import scripts.providernstest.testmaterial.onens.Context;
-import scripts.providernstest.testmaterial.onens.Service1;
+import scripts.providernstest.setdataext.testmaterial.Context;
+import scripts.providernstest.setdataext.testmaterial.Service1;
 
 /**
  * @author Winter Young
@@ -13,7 +13,7 @@ public class Service1Provider implements Service1 {
         DataExt dataExt = new DataExt();
         dataExt.setI(3);
 
-        context.setDataExtension(dataExt);
+        context.setDataExt(dataExt);
 
         return null;
     }
