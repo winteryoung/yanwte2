@@ -1,10 +1,10 @@
-package scripts.providernstest.initdataext.testmaterial.ns3;
+package scripts.providernstest.initdataext.testmaterial.multiservices.n2;
 
 /**
  * @author Winter Young
  * @since 2017/12/13
  */
-public class DataExt {
+public class DataExtN2 {
     private int i = 0;
 
     public int getI() {

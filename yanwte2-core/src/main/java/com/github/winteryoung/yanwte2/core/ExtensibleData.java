@@ -9,11 +9,15 @@ import com.github.winteryoung.yanwte2.core.internal.providerns.DataExtensions;
  */
 public interface ExtensibleData {
     default <T> T getDataExt() {
-        //noinspection unchecked
-        return (T) DataExtensions.get(this, CurrentThreadProviderNamespace.get());
+        return getDataExt(CurrentThreadProviderNamespace.get());
     }
 
     default void setDataExt(Object extension) {
         DataExtensions.put(this, CurrentThreadProviderNamespace.get(), extension);
+    }
+
+    default <T> T getDataExt(String providerNamespace) {
+        //noinspection unchecked
+        return (T) DataExtensions.get(this, providerNamespace);
     }
 }

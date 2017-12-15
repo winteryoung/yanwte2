@@ -1,4 +1,6 @@
-package scripts.providernstest.initdataext.testmaterial;
+package scripts.providernstest.initdataext.testmaterial.simple;
+
+import scripts.providernstest.initdataext.testmaterial.Context;
 
 import java.util.function.Function;
 

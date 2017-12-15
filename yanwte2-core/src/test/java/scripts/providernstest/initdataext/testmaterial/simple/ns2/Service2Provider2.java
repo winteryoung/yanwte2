@@ -1,13 +1,13 @@
-package scripts.providernstest.initdataext.testmaterial.ns1;
+package scripts.providernstest.initdataext.testmaterial.simple.ns2;
 
 import scripts.providernstest.initdataext.testmaterial.Context;
-import scripts.providernstest.initdataext.testmaterial.Service1;
+import scripts.providernstest.initdataext.testmaterial.simple.Service2;
 
 /**
  * @author Winter Young
  * @since 2017/12/13
  */
-public class Service1Provider1 implements Service1 {
+public class Service2Provider2 implements Service2 {
     @Override
     public Integer apply(Context context) {
         context.getDataExt();

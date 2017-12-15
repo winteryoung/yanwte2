@@ -1,7 +1,7 @@
-package scripts.providernstest.initdataext.testmaterial.ns3;
+package scripts.providernstest.initdataext.testmaterial.simple.ns3;
 
 import scripts.providernstest.initdataext.testmaterial.Context;
-import scripts.providernstest.initdataext.testmaterial.Service2;
+import scripts.providernstest.initdataext.testmaterial.simple.Service2;
 
 /**
  * @author Winter Young
