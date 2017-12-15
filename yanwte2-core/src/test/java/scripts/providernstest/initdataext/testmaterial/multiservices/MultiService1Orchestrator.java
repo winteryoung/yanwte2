@@ -9,7 +9,7 @@ import scripts.providernstest.initdataext.testmaterial.multiservices.n2.MultiSer
  * @author fanshen
  * @since 2017/12/15
  */
-public class MultiService1Orchestrator implements ServiceOrchestrator {
+public class MultiService1Orchestrator implements ServiceOrchestrator<MultiService1> {
     @Override
     public Combinator tree() {
         return chain(

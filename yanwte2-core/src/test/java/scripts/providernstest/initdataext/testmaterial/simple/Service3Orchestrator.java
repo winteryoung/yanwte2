@@ -9,7 +9,7 @@ import scripts.providernstest.initdataext.testmaterial.simple.ns3.Service3Provid
  * @author Winter Young
  * @since 2017/12/13
  */
-public class Service3Orchestrator implements ServiceOrchestrator {
+public class Service3Orchestrator implements ServiceOrchestrator<Service3> {
     @Override
     public Combinator tree() {
         return chain(

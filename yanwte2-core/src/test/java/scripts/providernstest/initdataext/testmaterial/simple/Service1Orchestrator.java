@@ -9,7 +9,7 @@ import scripts.providernstest.initdataext.testmaterial.simple.ns1.Service1Provid
  * @author Winter Young
  * @since 2017/12/13
  */
-public class Service1Orchestrator implements ServiceOrchestrator {
+public class Service1Orchestrator implements ServiceOrchestrator<Service1> {
     @Override
     public Combinator tree() {
         return chain(provider(Service1Provider1.class), provider(Service1Provider2.class));

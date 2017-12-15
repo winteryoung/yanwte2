@@ -1,4 +1,4 @@
-package scripts.serviceorchestratortest.testmaterial;
+package scripts.serviceorchestratortest.testmaterial.simple;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;

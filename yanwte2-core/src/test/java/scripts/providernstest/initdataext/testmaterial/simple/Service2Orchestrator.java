@@ -9,12 +9,9 @@ import scripts.providernstest.initdataext.testmaterial.simple.ns2.Service2Provid
  * @author Winter Young
  * @since 2017/12/13
  */
-public class Service2Orchestrator implements ServiceOrchestrator {
+public class Service2Orchestrator implements ServiceOrchestrator<Service2> {
     @Override
     public Combinator tree() {
-        return chain(
-                provider(Service2Provider1.class),
-                provider(Service2Provider2.class)
-        );
+        return chain(provider(Service2Provider1.class), provider(Service2Provider2.class));
     }
 }

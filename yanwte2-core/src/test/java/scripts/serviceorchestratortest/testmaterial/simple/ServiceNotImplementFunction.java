@@ -1,4 +1,4 @@
-package scripts.serviceorchestratortest.testmaterial;
+package scripts.serviceorchestratortest.testmaterial.simple;
 
 
 /**
