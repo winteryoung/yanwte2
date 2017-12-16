@@ -57,16 +57,15 @@ public class DataExtensions {
             if (dataExtension != null) {
                 if (dataExtension instanceof DataExtension) {
                     DataExtension dataExt = (DataExtension) dataExtension;
-                    Set<String> friendProviderPackages = dataExt.getFriendProviderPackages();
-                    if (friendProviderPackages != null && currentProviderPackage != null) {
-                        friendProviderPackages.add(providerPackage);
+                    Set<String> friendProviderPackages =
+                            DataExtensionFriendPackagesCache.get(dataExt, providerPackage);
 
-                        if (!friendProviderPackages.contains(currentProviderPackage)) {
-                            throw new RuntimeException(
-                                    String.format(
-                                            "Illegal access from provider package %s to data extension %s",
-                                            currentProviderPackage, dataExt.getClass()));
-                        }
+                    if (currentProviderPackage != null
+                            && !friendProviderPackages.contains(currentProviderPackage)) {
+                        throw new RuntimeException(
+                                String.format(
+                                        "Illegal access from provider package %s to data extension %s",
+                                        currentProviderPackage, dataExt.getClass()));
                     }
                 }
                 if (dataExtension != NULL_DATA_EXTENSION) {
@@ -78,15 +77,10 @@ public class DataExtensions {
 
             Function<Object, Object> initializer =
                     DataExtensionInitializers.get(extensibleData, providerPackage);
-            if (initializer != null) {
-                dataExtension = initializer.apply(extensibleData);
-                put(extensibleData, providerPackage, dataExtension);
+            dataExtension = initializer.apply(extensibleData);
+            put(extensibleData, providerPackage, dataExtension);
 
-                return get(extensibleData, providerPackage, currentProviderPackage);
-            }
-
-            put(extensibleData, providerPackage, NULL_DATA_EXTENSION);
-            return null;
+            return get(extensibleData, providerPackage, currentProviderPackage);
         } catch (UncheckedExecutionException | ExecutionException e) {
             Throwables.throwIfUnchecked(e.getCause());
             throw new RuntimeException(e.getCause());

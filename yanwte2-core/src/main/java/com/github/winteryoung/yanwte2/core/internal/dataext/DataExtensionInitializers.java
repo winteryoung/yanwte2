@@ -42,9 +42,7 @@ public class DataExtensionInitializers {
             Maps.newHashMap();
 
     private static void put(
-            Object extensibleData,
-            String providerPackage,
-            Function<Object, Object> initializer) {
+            Object extensibleData, String providerPackage, Function<Object, Object> initializer) {
         checkNotNull(extensibleData);
         checkNotNull(providerPackage);
         checkNotNull(initializer);
@@ -59,20 +57,14 @@ public class DataExtensionInitializers {
         }
     }
 
-    public static Function<Object, Object> get(
-            Object extensibleData, String providerPackage) {
+    public static Function<Object, Object> get(Object extensibleData, String providerPackage) {
         checkNotNull(extensibleData);
         checkNotNull(providerPackage);
 
         Function<Object, Object> initializer = getOrNull(extensibleData, providerPackage);
         if (initializer == null) {
-            Function<Object, Object> _initializer =
-                    initInitializer(extensibleData, providerPackage);
-            if (_initializer != null) {
-                return _initializer;
-            }
+            return initInitializer(extensibleData, providerPackage);
         }
-
         return initializer;
     }
 
@@ -86,8 +78,7 @@ public class DataExtensionInitializers {
             providerNsToInitializersMap.putAll(providerPackage, initializers);
 
             for (Function<Object, Object> initializer : initializers) {
-                initializerToExtensibleDataClassMap.put(
-                        initializer, extensibleData.getClass());
+                initializerToExtensibleDataClassMap.put(initializer, extensibleData.getClass());
             }
         }
 

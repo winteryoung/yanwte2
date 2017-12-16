@@ -3,6 +3,8 @@ package scripts.dataexttest.friends.testmaterial.illegal.ns7_1;
 import com.github.winteryoung.yanwte2.core.DataExtension;
 import com.github.winteryoung.yanwte2.core.DataExtensionInitializer;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.assertj.core.util.Sets;
 import scripts.dataexttest.friends.testmaterial.illegal.Context7;
 

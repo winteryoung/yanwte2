@@ -22,6 +22,11 @@ public class FriendDataExtTest {
         DataExt6_1 dataExt6_1 =
                 context6.getDataExt("scripts.dataexttest.friends.testmaterial.legal.ns6_1");
         Assertions.assertThat(dataExt6_1.getI()).isEqualTo(4);
+
+        dataExt6_1 =
+                context6.getDataExt("scripts.dataexttest.friends.testmaterial.legal.ns6_1");
+        Assertions.assertThat(dataExt6_1.getI()).isEqualTo(4);
+        Assertions.assertThat(DataExt6_1.getCounter().get()).isEqualTo(1);
     }
 
     @Test(

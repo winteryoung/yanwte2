@@ -6,6 +6,7 @@ import org.assertj.core.util.Sets;
 import scripts.dataexttest.friends.testmaterial.legal.Context6;
 
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Winter Young
@@ -24,11 +25,18 @@ public class DataExt6_1 implements DataExtension, DataExtensionInitializer<Conte
 
     @Override
     public Set<String> getFriendProviderPackages() {
+        counter.incrementAndGet();
         return Sets.newLinkedHashSet("scripts.dataexttest.friends.testmaterial.legal.ns6_2");
     }
 
     @Override
     public DataExt6_1 apply(Context6 context6) {
         return new DataExt6_1();
+    }
+
+    private static AtomicInteger counter = new AtomicInteger(0);
+
+    public static AtomicInteger getCounter() {
+        return counter;
     }
 }
