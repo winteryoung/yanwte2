@@ -3,6 +3,7 @@ package com.github.winteryoung.yanwte2.core.internal.dataext;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.winteryoung.yanwte2.core.DataExtension;
+import com.github.winteryoung.yanwte2.core.DataExtensionInitializer;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -10,7 +11,6 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 /**
  * @author Winter Young
@@ -75,9 +75,9 @@ public class DataExtensions {
                 }
             }
 
-            Function<Object, Object> initializer =
+            DataExtensionInitializer<Object, Object> initializer =
                     DataExtensionInitializers.get(extensibleData, providerPackage);
-            dataExtension = initializer.apply(extensibleData);
+            dataExtension = initializer.createDataExtension(extensibleData);
             put(extensibleData, providerPackage, dataExtension);
 
             return get(extensibleData, providerPackage, currentProviderPackage);
