@@ -1,7 +1,7 @@
 package com.github.winteryoung.yanwte2.core;
 
-import com.github.winteryoung.yanwte2.core.internal.providerns.CurrentThreadProviderNamespace;
-import com.github.winteryoung.yanwte2.core.internal.providerns.DataExtensions;
+import com.github.winteryoung.yanwte2.core.internal.dataext.CurrentThreadProviderNamespace;
+import com.github.winteryoung.yanwte2.core.internal.dataext.DataExtensions;
 
 /**
  * @author Winter Young

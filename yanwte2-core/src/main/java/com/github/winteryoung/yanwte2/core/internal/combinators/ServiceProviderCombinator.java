@@ -1,6 +1,6 @@
 package com.github.winteryoung.yanwte2.core.internal.combinators;
 
-import com.github.winteryoung.yanwte2.core.internal.providerns.CurrentThreadProviderNamespace;
+import com.github.winteryoung.yanwte2.core.internal.dataext.CurrentThreadProviderNamespace;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
 import java.net.URI;
