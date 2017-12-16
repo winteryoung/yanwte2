@@ -2,11 +2,12 @@ package com.github.winteryoung.yanwte2.core.internal.dataext;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.github.winteryoung.yanwte2.core.DataExtension;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -43,7 +44,8 @@ public class DataExtensions {
         }
     }
 
-    public static Object get(Object extensibleData, String providerPackage) {
+    public static Object get(
+            Object extensibleData, String providerPackage, String currentProviderPackage) {
         checkNotNull(extensibleData);
         checkNotNull(providerPackage);
 
@@ -53,6 +55,20 @@ public class DataExtensions {
             Object dataExtension = secLevelMap.get(providerPackage);
 
             if (dataExtension != null) {
+                if (dataExtension instanceof DataExtension) {
+                    DataExtension dataExt = (DataExtension) dataExtension;
+                    Set<String> friendProviderPackages = dataExt.getFriendProviderPackages();
+                    if (friendProviderPackages != null && currentProviderPackage != null) {
+                        friendProviderPackages.add(providerPackage);
+
+                        if (!friendProviderPackages.contains(currentProviderPackage)) {
+                            throw new RuntimeException(
+                                    String.format(
+                                            "Illegal access from provider package %s to data extension %s",
+                                            currentProviderPackage, dataExt.getClass()));
+                        }
+                    }
+                }
                 if (dataExtension != NULL_DATA_EXTENSION) {
                     return dataExtension;
                 } else {
@@ -66,7 +82,7 @@ public class DataExtensions {
                 dataExtension = initializer.apply(extensibleData);
                 put(extensibleData, providerPackage, dataExtension);
 
-                return get(extensibleData, providerPackage);
+                return get(extensibleData, providerPackage, currentProviderPackage);
             }
 
             put(extensibleData, providerPackage, NULL_DATA_EXTENSION);

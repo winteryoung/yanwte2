@@ -12,12 +12,13 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.ClassPath;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -121,16 +122,32 @@ public class ServiceOrchestratorLoader {
         }
 
         String serviceTypeName = serviceType.getName();
-        String expectedName = serviceTypeName + "Orchestrator";
+
+        List<String> expectedNames =
+                Lists.newArrayList(serviceTypeName, serviceTypeName + "Orchestrator");
 
         for (ClassPath.ClassInfo classInfo : classInfos) {
-            if (expectedName.equals(classInfo.getName())) {
-                Class<?> orchestratorClass = classInfo.load();
-                if (ServiceOrchestrator.class.isAssignableFrom(orchestratorClass)) {
-                    try {
-                        return (ServiceOrchestrator) orchestratorClass.newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new RuntimeException(e);
+            for (String expectedName : expectedNames) {
+                if (expectedName.equals(classInfo.getName())) {
+                    Class<?> orchestratorClass = classInfo.load();
+                    if (ServiceOrchestrator.class.isAssignableFrom(orchestratorClass)) {
+                        Class<?> orchestratorImplClass;
+                        if (orchestratorClass.isInterface()) {
+                            orchestratorImplClass =
+                                    new ByteBuddy()
+                                            .subclass(orchestratorClass)
+                                            .make()
+                                            .load(orchestratorClass.getClassLoader())
+                                            .getLoaded();
+                        } else {
+                            orchestratorImplClass = orchestratorClass;
+                        }
+
+                        try {
+                            return (ServiceOrchestrator) orchestratorImplClass.newInstance();
+                        } catch (InstantiationException | IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
             }

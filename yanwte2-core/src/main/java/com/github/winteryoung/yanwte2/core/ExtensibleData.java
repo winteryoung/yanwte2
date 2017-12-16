@@ -18,6 +18,6 @@ public interface ExtensibleData {
 
     default <T> T getDataExt(String providerPackage) {
         //noinspection unchecked
-        return (T) DataExtensions.get(this, providerPackage);
+        return (T) DataExtensions.get(this, providerPackage, CurrentThreadProviderPackage.get());
     }
 }
