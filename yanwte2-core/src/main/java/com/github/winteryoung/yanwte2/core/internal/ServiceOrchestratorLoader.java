@@ -13,10 +13,11 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -99,7 +100,7 @@ public class ServiceOrchestratorLoader {
                     Combinator combinator;
                     try {
                         combinator = lazyTree.get(1);
-                    } catch (ExecutionException | UncheckedExecutionException e) {
+                    } catch (UncheckedExecutionException | ExecutionException e) {
                         Throwables.throwIfUnchecked(e.getCause());
                         throw new RuntimeException(e.getCause());
                     }

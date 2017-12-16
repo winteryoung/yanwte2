@@ -2,9 +2,11 @@ package com.github.winteryoung.yanwte2.core.internal.dataext;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -22,33 +24,33 @@ public class DataExtensions {
     private static Cache<Object, ConcurrentHashMap<String, Object>> cache =
             CacheBuilder.newBuilder().weakKeys().build();
 
-    public static void put(
-            Object hostExtensibleObject, String providerNamespace, Object dataExtension) {
-        checkNotNull(hostExtensibleObject);
-        checkNotNull(providerNamespace);
+    public static void put(Object extensibleData, String providerPackage, Object dataExtension) {
+        checkNotNull(extensibleData);
+        checkNotNull(providerPackage);
 
         try {
             ConcurrentHashMap<String, Object> secLevelMap =
-                    cache.get(hostExtensibleObject, ConcurrentHashMap::new);
+                    cache.get(extensibleData, ConcurrentHashMap::new);
 
             if (dataExtension != null) {
-                secLevelMap.put(providerNamespace, dataExtension);
+                secLevelMap.put(providerPackage, dataExtension);
             } else {
-                secLevelMap.put(providerNamespace, NULL_DATA_EXTENSION);
+                secLevelMap.put(providerPackage, NULL_DATA_EXTENSION);
             }
         } catch (UncheckedExecutionException | ExecutionException e) {
-            throw new RuntimeException(e);
+            Throwables.throwIfUnchecked(e.getCause());
+            throw new RuntimeException(e.getCause());
         }
     }
 
-    public static Object get(Object hostExtensibleObject, String providerNamespace) {
-        checkNotNull(hostExtensibleObject);
-        checkNotNull(providerNamespace);
+    public static Object get(Object extensibleData, String providerPackage) {
+        checkNotNull(extensibleData);
+        checkNotNull(providerPackage);
 
         try {
             ConcurrentHashMap<String, Object> secLevelMap =
-                    cache.get(hostExtensibleObject, ConcurrentHashMap::new);
-            Object dataExtension = secLevelMap.get(providerNamespace);
+                    cache.get(extensibleData, ConcurrentHashMap::new);
+            Object dataExtension = secLevelMap.get(providerPackage);
 
             if (dataExtension != null) {
                 if (dataExtension != NULL_DATA_EXTENSION) {
@@ -59,18 +61,19 @@ public class DataExtensions {
             }
 
             Function<Object, Object> initializer =
-                    DataExtensionInitializers.get(hostExtensibleObject, providerNamespace);
+                    DataExtensionInitializers.get(extensibleData, providerPackage);
             if (initializer != null) {
-                dataExtension = initializer.apply(hostExtensibleObject);
-                put(hostExtensibleObject, providerNamespace, dataExtension);
+                dataExtension = initializer.apply(extensibleData);
+                put(extensibleData, providerPackage, dataExtension);
 
-                return get(hostExtensibleObject, providerNamespace);
+                return get(extensibleData, providerPackage);
             }
 
-            put(hostExtensibleObject, providerNamespace, NULL_DATA_EXTENSION);
+            put(extensibleData, providerPackage, NULL_DATA_EXTENSION);
             return null;
         } catch (UncheckedExecutionException | ExecutionException e) {
-            throw new RuntimeException(e);
+            Throwables.throwIfUnchecked(e.getCause());
+            throw new RuntimeException(e.getCause());
         }
     }
 }

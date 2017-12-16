@@ -3,6 +3,8 @@ package scripts.serviceorchestratortest;
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
+import scripts.serviceorchestratortest.testmaterial.lazycombinator.Service4;
+import scripts.serviceorchestratortest.testmaterial.lazycombinator.Service4Orchestrator;
 import scripts.serviceorchestratortest.testmaterial.orchestratorwithoutgenerictype.Service5;
 import scripts.serviceorchestratortest.testmaterial.simple.*;
 
@@ -59,5 +61,13 @@ public class ServiceOrchestratorTest {
     public void testOrchestratorWithoutGenericType() {
         Service5 service5 = ServiceOrchestrator.getOrchestrator(Service5.class);
         service5.apply("");
+    }
+
+    @Test
+    public void testLazyCombinatorInvocation() {
+        Service4 service4 = ServiceOrchestrator.getOrchestrator(Service4.class);
+        service4.apply(null);
+        service4.apply(null);
+        Assertions.assertThat(Service4Orchestrator.getCounter().get()).isEqualTo(1);
     }
 }

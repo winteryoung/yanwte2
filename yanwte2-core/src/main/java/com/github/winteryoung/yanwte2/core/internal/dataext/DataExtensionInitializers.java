@@ -3,6 +3,7 @@ package com.github.winteryoung.yanwte2.core.internal.dataext;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.winteryoung.yanwte2.core.DataExtensionInitializer;
+import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.HashMultimap;
@@ -37,35 +38,36 @@ public class DataExtensionInitializers {
     private static Multimap<String, Function<Object, Object>> providerNsToInitializersMap =
             HashMultimap.create();
 
-    private static Map<Function<Object, Object>, Class<?>> initializerToHostExtensibleObjectMap =
+    private static Map<Function<Object, Object>, Class<?>> initializerToExtensibleDataClassMap =
             Maps.newHashMap();
 
     private static void put(
-            Object hostExtensibleObject,
-            String providerNamespace,
+            Object extensibleData,
+            String providerPackage,
             Function<Object, Object> initializer) {
-        checkNotNull(hostExtensibleObject);
-        checkNotNull(providerNamespace);
+        checkNotNull(extensibleData);
+        checkNotNull(providerPackage);
         checkNotNull(initializer);
 
         try {
             Map<String, Function<Object, Object>> secLevelMap =
-                    cache.get(hostExtensibleObject, ConcurrentHashMap::new);
-            secLevelMap.put(providerNamespace, initializer);
+                    cache.get(extensibleData, ConcurrentHashMap::new);
+            secLevelMap.put(providerPackage, initializer);
         } catch (UncheckedExecutionException | ExecutionException e) {
-            throw new RuntimeException(e);
+            Throwables.throwIfUnchecked(e.getCause());
+            throw new RuntimeException(e.getCause());
         }
     }
 
     public static Function<Object, Object> get(
-            Object hostExtensibleObject, String providerNamespace) {
-        checkNotNull(hostExtensibleObject);
-        checkNotNull(providerNamespace);
+            Object extensibleData, String providerPackage) {
+        checkNotNull(extensibleData);
+        checkNotNull(providerPackage);
 
-        Function<Object, Object> initializer = getOrNull(hostExtensibleObject, providerNamespace);
+        Function<Object, Object> initializer = getOrNull(extensibleData, providerPackage);
         if (initializer == null) {
             Function<Object, Object> _initializer =
-                    initInitializer(hostExtensibleObject, providerNamespace);
+                    initInitializer(extensibleData, providerPackage);
             if (_initializer != null) {
                 return _initializer;
             }
@@ -75,38 +77,38 @@ public class DataExtensionInitializers {
     }
 
     private static synchronized Function<Object, Object> initInitializer(
-            Object hostExtensibleObject, String providerNamespace) {
+            Object extensibleData, String providerPackage) {
         Collection<Function<Object, Object>> initializers =
-                providerNsToInitializersMap.get(providerNamespace);
+                providerNsToInitializersMap.get(providerPackage);
 
         if (initializers.isEmpty()) {
-            initializers = initProviderNs(providerNamespace);
-            providerNsToInitializersMap.putAll(providerNamespace, initializers);
+            initializers = initProviderNs(providerPackage);
+            providerNsToInitializersMap.putAll(providerPackage, initializers);
 
             for (Function<Object, Object> initializer : initializers) {
-                initializerToHostExtensibleObjectMap.put(
-                        initializer, hostExtensibleObject.getClass());
+                initializerToExtensibleDataClassMap.put(
+                        initializer, extensibleData.getClass());
             }
         }
 
         for (Function<Object, Object> initializer : initializers) {
-            Class<?> hostExtensibleClass = initializerToHostExtensibleObjectMap.get(initializer);
-            if (hostExtensibleClass == hostExtensibleObject.getClass()) {
-                put(hostExtensibleObject, providerNamespace, initializer);
+            Class<?> extensibleDataClass = initializerToExtensibleDataClassMap.get(initializer);
+            if (extensibleDataClass == extensibleData.getClass()) {
+                put(extensibleData, providerPackage, initializer);
                 return initializer;
             }
         }
 
-        put(hostExtensibleObject, providerNamespace, NULL_INITIALIZER);
+        put(extensibleData, providerPackage, NULL_INITIALIZER);
         return NULL_INITIALIZER;
     }
 
     @SuppressWarnings("unchecked")
-    private static Collection<Function<Object, Object>> initProviderNs(String providerNamespace) {
+    private static Collection<Function<Object, Object>> initProviderNs(String providerPackage) {
         try {
             List result =
                     ClassPath.from(Thread.currentThread().getContextClassLoader())
-                            .getTopLevelClasses(providerNamespace)
+                            .getTopLevelClasses(providerPackage)
                             .stream()
                             .map(ClassPath.ClassInfo::load)
                             .filter(DataExtensionInitializer.class::isAssignableFrom)
@@ -128,13 +130,14 @@ public class DataExtensionInitializers {
     }
 
     private static Function<Object, Object> getOrNull(
-            Object hostExtensibleObject, String providerNamespace) {
+            Object extensibleData, String providerPackage) {
         try {
             Map<String, Function<Object, Object>> secLevelMap =
-                    cache.get(hostExtensibleObject, ConcurrentHashMap::new);
-            return secLevelMap.get(providerNamespace);
+                    cache.get(extensibleData, ConcurrentHashMap::new);
+            return secLevelMap.get(providerPackage);
         } catch (UncheckedExecutionException | ExecutionException e) {
-            throw new RuntimeException(e);
+            Throwables.throwIfUnchecked(e.getCause());
+            throw new RuntimeException(e.getCause());
         }
     }
 }

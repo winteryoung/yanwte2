@@ -1,6 +1,6 @@
 package com.github.winteryoung.yanwte2.core;
 
-import com.github.winteryoung.yanwte2.core.internal.dataext.CurrentThreadProviderNamespace;
+import com.github.winteryoung.yanwte2.core.internal.dataext.CurrentThreadProviderPackage;
 import com.github.winteryoung.yanwte2.core.internal.dataext.DataExtensions;
 
 /**
@@ -9,15 +9,15 @@ import com.github.winteryoung.yanwte2.core.internal.dataext.DataExtensions;
  */
 public interface ExtensibleData {
     default <T> T getDataExt() {
-        return getDataExt(CurrentThreadProviderNamespace.get());
+        return getDataExt(CurrentThreadProviderPackage.get());
     }
 
     default void setDataExt(Object extension) {
-        DataExtensions.put(this, CurrentThreadProviderNamespace.get(), extension);
+        DataExtensions.put(this, CurrentThreadProviderPackage.get(), extension);
     }
 
-    default <T> T getDataExt(String providerNamespace) {
+    default <T> T getDataExt(String providerPackage) {
         //noinspection unchecked
-        return (T) DataExtensions.get(this, providerNamespace);
+        return (T) DataExtensions.get(this, providerPackage);
     }
 }
