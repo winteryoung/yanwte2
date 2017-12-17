@@ -31,7 +31,7 @@ public class UnnamedCombinator implements SurrogateCombinator {
     }
 
     @Override
-    public List<Combinator> getSurrogateCombinators(Set<String> providerPackages) {
+    public List<Combinator> getSurrogateCombinators() {
         Lazy<Combinator> lazyTree = CombinatorTreeCache.getLazyTree(serviceOrchestrator);
         Combinator root = lazyTree.get();
 

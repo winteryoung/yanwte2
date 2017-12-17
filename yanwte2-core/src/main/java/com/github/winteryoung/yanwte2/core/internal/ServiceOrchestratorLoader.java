@@ -5,15 +5,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
+import com.github.winteryoung.yanwte2.core.internal.combinators.ServiceProviderCombinator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.SurrogateCombinator;
 import com.github.winteryoung.yanwte2.core.utils.Lazy;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.google.common.collect.*;
 import com.google.common.reflect.ClassPath;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.io.IOException;
@@ -73,8 +72,7 @@ public class ServiceOrchestratorLoader {
                         .method(ElementMatchers.named("apply"))
                         .intercept(
                                 MethodDelegation.to(
-                                        createInterceptor(
-                                                lazyTree, serviceType, userDefinedOrchestrator)))
+                                        createInterceptor(lazyTree, userDefinedOrchestrator)))
                         .make()
                         .load(serviceType.getClassLoader())
                         .getLoaded();
@@ -88,9 +86,7 @@ public class ServiceOrchestratorLoader {
     }
 
     private static OrchestratorInterceptor createInterceptor(
-            Lazy<Combinator> lazyTree,
-            Class<? extends Function> serviceType,
-            ServiceOrchestrator serviceOrchestrator) {
+            Lazy<Combinator> lazyTree, ServiceOrchestrator serviceOrchestrator) {
         Lazy<Combinator> lazyExpandedTree =
                 Lazy.of(
                         () -> {
@@ -107,9 +103,9 @@ public class ServiceOrchestratorLoader {
                                             + "combinator, orchestrator: "
                                             + serviceOrchestrator);
 
-                            Set<String> providerPackages = collectNamedCombinators(tree);
+                            expand(tree);
 
-                            expand(tree, providerPackages, serviceType);
+                            validate(tree);
 
                             return tree;
                         });
@@ -121,32 +117,48 @@ public class ServiceOrchestratorLoader {
                 });
     }
 
-    private static Set<String> collectNamedCombinators(Combinator tree) {
-        return ImmutableSet.of();
+    private static void validate(Combinator node) {
+        Set<ServiceProviderCombinator> providerCombinators = Sets.newHashSet();
+        collectServiceProviderCombinators(node, providerCombinators);
+
+        // make sure one package only contains one provider for a given service type
+        Maps.uniqueIndex(providerCombinators, ServiceProviderCombinator::getProviderPackage);
     }
 
-    private static void expand(
-            Combinator combinator,
-            Set<String> providerPackages,
-            Class<? extends Function> serviceType) {
-        checkNotNull(combinator);
+    private static void collectServiceProviderCombinators(
+            Combinator node, Set<ServiceProviderCombinator> result) {
+        //noinspection SuspiciousMethodCalls
+        if (result.contains(node)) {
+            return;
+        }
 
-        expandChildren(combinator, providerPackages, serviceType);
+        if (node instanceof ServiceProviderCombinator) {
+            result.add((ServiceProviderCombinator) node);
+        }
 
-        for (Combinator child : combinator.getChildren()) {
-            expand(child, providerPackages, serviceType);
+        List<Combinator> children = node.getChildren();
+        if (children == null) {
+            return;
+        }
+
+        for (Combinator child : children) {
+            collectServiceProviderCombinators(child, result);
         }
     }
 
-    private static void expandChildren(
-            Combinator combinator,
-            Set<String> providerPackages,
-            Class<? extends Function> serviceType) {
+    private static void expand(Combinator combinator) {
+        checkNotNull(combinator);
+
+        expandChildren(combinator);
+
+        for (Combinator child : combinator.getChildren()) {
+            expand(child);
+        }
+    }
+
+    private static void expandChildren(Combinator combinator) {
         List<Combinator> children = combinator.getChildren();
         checkNotNull(children);
-
-        // check for multiple providers for one service type in the same package
-        ServiceProviderLocators.locateAllProvidersIndexedByPackages(serviceType);
 
         children =
                 children.stream()
@@ -156,7 +168,7 @@ public class ServiceOrchestratorLoader {
                                         SurrogateCombinator surrogateCombinator =
                                                 (SurrogateCombinator) child;
                                         return surrogateCombinator
-                                                .getSurrogateCombinators(providerPackages)
+                                                .getSurrogateCombinators()
                                                 .stream();
                                     } else {
                                         return ImmutableList.of(child).stream();

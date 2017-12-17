@@ -1,5 +1,6 @@
 package scripts.dataext.initdataext.testmaterial.simple.ns3;
 
+import org.assertj.core.api.Assertions;
 import scripts.dataext.initdataext.testmaterial.Context;
 import scripts.dataext.initdataext.testmaterial.simple.Service2;
 import scripts.dataext.initdataext.testmaterial.simple.Service3;
@@ -11,7 +12,8 @@ import scripts.dataext.initdataext.testmaterial.simple.Service3;
 public class Service3Provider1 implements Service3 {
     @Override
     public Integer apply(Context context) {
-        context.getDataExt();
+        Object dataExt = context.getDataExt();
+        Assertions.assertThat(dataExt).isNull();
         return null;
     }
 }

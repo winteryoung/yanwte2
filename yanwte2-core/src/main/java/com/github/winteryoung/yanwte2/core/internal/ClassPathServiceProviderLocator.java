@@ -3,8 +3,6 @@ package com.github.winteryoung.yanwte2.core.internal;
 import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.reflect.ClassPath;
-
 import java.net.URI;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -44,7 +42,7 @@ public class ClassPathServiceProviderLocator implements ServiceProviderLocator {
         }
     }
 
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
     @Override
     public Set<Function<Object, Object>> getProviders(Class<? extends Function> serviceType) {
         List<Function<Object, Object>> providers = Lists.newArrayList();

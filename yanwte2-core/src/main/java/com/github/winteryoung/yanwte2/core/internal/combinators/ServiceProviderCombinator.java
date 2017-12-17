@@ -1,17 +1,15 @@
 package com.github.winteryoung.yanwte2.core.internal.combinators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.github.winteryoung.yanwte2.core.internal.ServiceProviderLocators;
 import com.github.winteryoung.yanwte2.core.internal.dataext.CurrentThreadProviderPackage;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.LeafCombinator;
-import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
 import com.google.common.collect.ImmutableList;
-
 import java.net.URI;
 import java.util.List;
 import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Winter Young
@@ -47,5 +45,10 @@ public class ServiceProviderCombinator implements LeafCombinator {
     @Override
     public List<Combinator> getChildren() {
         return ImmutableList.of();
+    }
+
+    @Override
+    public String toString() {
+        return provider.getClass().getName();
     }
 }

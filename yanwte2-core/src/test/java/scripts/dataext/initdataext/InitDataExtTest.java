@@ -24,9 +24,10 @@ public class InitDataExtTest {
         Context context = new Context();
 
         Service1 service1 = ServiceOrchestrator.getOrchestrator(Service1.class);
-        Integer service2Result = service1.apply(context);
-        Assertions.assertThat(service2Result).isEqualTo(3);
+        Integer service1Result = service1.apply(context);
+        Assertions.assertThat(service1Result).isEqualTo(3);
 
+        service1.apply(context);
         Assertions.assertThat(DataExtInitializerImplNs1.getCounter()).isEqualTo(1);
     }
 
@@ -38,6 +39,7 @@ public class InitDataExtTest {
         Integer service2Result = service2.apply(context);
         Assertions.assertThat(service2Result).isNull();
 
+        service2.apply(context);
         Assertions.assertThat(DataExtInitializerImplNs2.getCounter()).isEqualTo(1);
     }
 

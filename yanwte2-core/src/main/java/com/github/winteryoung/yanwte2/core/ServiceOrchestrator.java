@@ -1,10 +1,7 @@
 package com.github.winteryoung.yanwte2.core;
 
 import com.github.winteryoung.yanwte2.core.internal.ServiceOrchestratorLoader;
-import com.github.winteryoung.yanwte2.core.internal.combinators.ChainCombinator;
-import com.github.winteryoung.yanwte2.core.internal.combinators.MapReduceCombinator;
-import com.github.winteryoung.yanwte2.core.internal.combinators.UnnamedCombinator;
-import com.github.winteryoung.yanwte2.core.internal.combinators.ServiceProviderCombinator;
+import com.github.winteryoung.yanwte2.core.internal.combinators.*;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
@@ -50,6 +47,10 @@ public interface ServiceOrchestrator<T extends Function> {
     default Combinator unnamed() {
         Class<? super T> parameterType = new TypeToken<T>(getClass()) {}.getRawType();
         return new UnnamedCombinator(this, (Class) parameterType);
+    }
+
+    default Combinator empty() {
+        return new EmptyCombinator();
     }
 
     static <T extends Function> T getOrchestrator(Class<T> serviceType) {

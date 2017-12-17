@@ -1,7 +1,6 @@
 package com.github.winteryoung.yanwte2.core.spi;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Winter Young
@@ -13,5 +12,5 @@ public interface SurrogateCombinator extends LeafCombinator {
         return null;
     }
 
-    List<Combinator> getSurrogateCombinators(Set<String> providerPackages);
+    List<Combinator> getSurrogateCombinators();
 }

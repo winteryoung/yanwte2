@@ -1,8 +1,10 @@
 package scripts.emptycombinator;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
+import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 import scripts.emptycombinator.testmaterial.Service10;
+import scripts.emptycombinator.testmaterial.Service12;
 
 /**
  * @author Winter Young
@@ -18,5 +20,11 @@ public class EmptyCombinatorTest {
     public void testTreeReturningNull() {
         Service10 service10 = ServiceOrchestrator.getOrchestrator(Service10.class);
         service10.apply("");
+    }
+
+    @Test
+    public void testEmpty() {
+        Service12 service12 = ServiceOrchestrator.getOrchestrator(Service12.class);
+        Assertions.assertThat(service12.apply("")).isNull();
     }
 }

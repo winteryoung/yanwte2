@@ -10,7 +10,7 @@ import scripts.dataext.initdataext.testmaterial.simple.Service1;
 public class Service1Provider1 implements Service1 {
     @Override
     public Integer apply(Context context) {
-        context.getDataExt();
-        return null;
+        DataExt dataExt = context.getDataExt();
+        return dataExt.getI();
     }
 }
