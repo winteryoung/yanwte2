@@ -6,8 +6,6 @@ import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.internal.CombinatorTreeCache;
 import com.github.winteryoung.yanwte2.core.internal.ServiceProviderLocators;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
-import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
-
 import com.github.winteryoung.yanwte2.core.spi.SurrogateCombinator;
 import com.github.winteryoung.yanwte2.core.utils.Lazy;
 import com.google.common.collect.Sets;
@@ -51,15 +49,18 @@ public class UnnamedCombinator implements SurrogateCombinator {
         Set<Combinator> visitedNodes = Sets.newHashSet();
         depthFirstTraverse(root, visitedNodes, namedPackages);
 
-        return Sets.difference(totalPackages, namedPackages).stream()
-                .map(pkg -> {
-                    Function<Object, Object> provider = packageIndexedProviders.get(pkg);
-                    return new ServiceProviderCombinator(provider);
-                })
+        return Sets.difference(totalPackages, namedPackages)
+                .stream()
+                .map(
+                        pkg -> {
+                            Function<Object, Object> provider = packageIndexedProviders.get(pkg);
+                            return new ServiceProviderCombinator(provider);
+                        })
                 .collect(Collectors.toList());
     }
 
-    private void depthFirstTraverse(Combinator node, Set<Combinator> visitedNodes, Set<String> namedPackages) {
+    private void depthFirstTraverse(
+            Combinator node, Set<Combinator> visitedNodes, Set<String> namedPackages) {
         if (visitedNodes.contains(node)) {
             return;
         }
