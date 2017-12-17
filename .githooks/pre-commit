@@ -1,4 +1,5 @@
 #!/bin/sh
 
 echo "pre-commit"
+exit 1
 ruby .githooks/pre-commit.rb
