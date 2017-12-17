@@ -3,6 +3,7 @@ package com.github.winteryoung.yanwte2.core.internal.combinators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
+import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 /**
@@ -13,7 +14,8 @@ public class ChainCombinator implements Combinator {
     private List<Combinator> combinators;
 
     public ChainCombinator(List<Combinator> combinators) {
-        this.combinators = checkNotNull(combinators);
+        checkNotNull(combinators);
+        this.combinators = ImmutableList.copyOf(combinators);
     }
 
     @Override
@@ -25,5 +27,15 @@ public class ChainCombinator implements Combinator {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<Combinator> getChildren() {
+        return combinators;
+    }
+
+    @Override
+    public void setChildren(List<Combinator> children) {
+        combinators = ImmutableList.copyOf(children);
     }
 }

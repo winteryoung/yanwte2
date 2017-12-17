@@ -1,7 +1,14 @@
 package com.github.winteryoung.yanwte2.core.internal;
 
 import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.reflect.ClassPath;
+
 import java.net.URI;
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -35,5 +42,19 @@ public class ClassPathServiceProviderLocator implements ServiceProviderLocator {
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    @Override
+    public Set<Function<Object, Object>> getProviders(Class<? extends Function> serviceType) {
+        List<Function<Object, Object>> providers = Lists.newArrayList();
+
+        synchronized (serviceType) {
+            for (Function provider : ServiceLoader.load(serviceType)) {
+                providers.add(provider);
+            }
+        }
+
+        return Sets.newHashSet(providers);
     }
 }

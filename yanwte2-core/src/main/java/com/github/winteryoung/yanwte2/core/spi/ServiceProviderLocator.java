@@ -1,8 +1,7 @@
 package com.github.winteryoung.yanwte2.core.spi;
 
-import com.github.winteryoung.yanwte2.core.internal.ServiceProviderLocatorStaticImpl;
-
 import java.net.URI;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -12,7 +11,5 @@ import java.util.function.Function;
 public interface ServiceProviderLocator {
     Function<Object, Object> getProvider(URI providerURI);
 
-    static Function<Object, Object> locateProvider(URI providerURI) {
-        return ServiceProviderLocatorStaticImpl.locateProvider(providerURI);
-    }
+    Set<Function<Object, Object>> getProviders(Class<? extends Function> serviceType);
 }

@@ -1,7 +1,8 @@
-package scripts.serviceorchestrator.testmaterial.lazycombinator;
+package scripts.lazycombinator.testmaterial;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
+import com.github.winteryoung.yanwte2.core.spi.LeafCombinator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -14,7 +15,7 @@ public class Service4Orchestrator implements ServiceOrchestrator<Service4> {
     @Override
     public Combinator tree() {
         counter.incrementAndGet();
-        return (arg) -> null;
+        return (LeafCombinator) arg -> null;
     }
 
     public static AtomicInteger getCounter() {

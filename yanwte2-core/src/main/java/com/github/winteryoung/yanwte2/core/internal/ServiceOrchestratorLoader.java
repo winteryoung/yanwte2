@@ -6,19 +6,22 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
+import com.github.winteryoung.yanwte2.core.spi.SurrogateCombinator;
+import com.github.winteryoung.yanwte2.core.utils.Lazy;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.ClassPath;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -33,7 +36,7 @@ public class ServiceOrchestratorLoader {
     private static Cache<Class<?>, Object> orchestratorCacheByType =
             CacheBuilder.newBuilder().build();
 
-    public static <T> T getOrchestratorByServiceType(Class<T> serviceType) {
+    public static <T extends Function> T getOrchestratorByServiceType(Class<T> serviceType) {
         checkNotNull(serviceType);
         checkArgument(
                 serviceType.isInterface(),
@@ -56,19 +59,22 @@ public class ServiceOrchestratorLoader {
         return (T) orchestrator;
     }
 
-    private static <T> T createOrchestratorByType(Class<T> serviceType) {
+    private static <T extends Function> T createOrchestratorByType(Class<T> serviceType) {
         ServiceOrchestrator userDefinedOrchestrator = loadUserDefinedOrchestrator(serviceType);
         checkState(
                 userDefinedOrchestrator != null,
                 "Cannot find orchestrator for service: " + serviceType.getName());
 
-        LoadingCache<Integer, Combinator> lazyTree = getLazyCombinatorTree(userDefinedOrchestrator);
+        Lazy<Combinator> lazyTree = CombinatorTreeCache.getLazyTree(userDefinedOrchestrator);
 
         Class<? extends T> proxyType =
                 new ByteBuddy()
                         .subclass(serviceType)
                         .method(ElementMatchers.named("apply"))
-                        .intercept(MethodDelegation.to(createInterceptor(lazyTree)))
+                        .intercept(
+                                MethodDelegation.to(
+                                        createInterceptor(
+                                                lazyTree, serviceType, userDefinedOrchestrator)))
                         .make()
                         .load(serviceType.getClassLoader())
                         .getLoaded();
@@ -81,33 +87,84 @@ public class ServiceOrchestratorLoader {
         }
     }
 
-    private static LoadingCache<Integer, Combinator> getLazyCombinatorTree(
-            ServiceOrchestrator userDefinedOrchestrator) {
-        return CacheBuilder.newBuilder()
-                .build(
-                        new CacheLoader<Integer, Combinator>() {
-                            @Override
-                            public Combinator load(
-                                    @SuppressWarnings("NullableProblems") Integer key) {
-                                return userDefinedOrchestrator.tree();
-                            }
-                        });
-    }
-
     private static OrchestratorInterceptor createInterceptor(
-            LoadingCache<Integer, Combinator> lazyTree) {
+            Lazy<Combinator> lazyTree,
+            Class<? extends Function> serviceType,
+            ServiceOrchestrator serviceOrchestrator) {
+        Lazy<Combinator> lazyExpandedTree =
+                Lazy.of(
+                        () -> {
+                            Combinator tree = lazyTree.get();
+
+                            checkState(
+                                    tree != null,
+                                    "Combinator is required in tree() definition. "
+                                            + "If you don't have one, use empty() instead");
+
+                            checkState(
+                                    !(tree instanceof SurrogateCombinator),
+                                    "The root of tree cannot be a surrogate "
+                                            + "combinator, orchestrator: "
+                                            + serviceOrchestrator);
+
+                            Set<String> providerPackages = collectNamedCombinators(tree);
+
+                            expand(tree, providerPackages, serviceType);
+
+                            return tree;
+                        });
+
         return new OrchestratorInterceptor(
                 (arg) -> {
-                    Combinator combinator;
-                    try {
-                        combinator = lazyTree.get(1);
-                    } catch (UncheckedExecutionException | ExecutionException e) {
-                        Throwables.throwIfUnchecked(e.getCause());
-                        throw new RuntimeException(e.getCause());
-                    }
-                    checkNotNull(combinator);
+                    Combinator combinator = lazyExpandedTree.get();
                     return combinator.invoke(arg);
                 });
+    }
+
+    private static Set<String> collectNamedCombinators(Combinator tree) {
+        return ImmutableSet.of();
+    }
+
+    private static void expand(
+            Combinator combinator,
+            Set<String> providerPackages,
+            Class<? extends Function> serviceType) {
+        checkNotNull(combinator);
+
+        expandChildren(combinator, providerPackages, serviceType);
+
+        for (Combinator child : combinator.getChildren()) {
+            expand(child, providerPackages, serviceType);
+        }
+    }
+
+    private static void expandChildren(
+            Combinator combinator,
+            Set<String> providerPackages,
+            Class<? extends Function> serviceType) {
+        List<Combinator> children = combinator.getChildren();
+        checkNotNull(children);
+
+        // check for multiple providers for one service type in the same package
+        ServiceProviderLocators.locateAllProvidersIndexedByPackages(serviceType);
+
+        children =
+                children.stream()
+                        .flatMap(
+                                child -> {
+                                    if (child instanceof SurrogateCombinator) {
+                                        SurrogateCombinator surrogateCombinator =
+                                                (SurrogateCombinator) child;
+                                        return surrogateCombinator
+                                                .getSurrogateCombinators(providerPackages)
+                                                .stream();
+                                    } else {
+                                        return ImmutableList.of(child).stream();
+                                    }
+                                })
+                        .collect(Collectors.toList());
+
+        combinator.setChildren(children);
     }
 
     private static <T> ServiceOrchestrator loadUserDefinedOrchestrator(Class<T> serviceType) {

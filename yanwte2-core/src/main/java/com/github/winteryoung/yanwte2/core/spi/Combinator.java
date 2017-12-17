@@ -1,5 +1,6 @@
 package com.github.winteryoung.yanwte2.core.spi;
 
+import java.util.List;
 
 /**
  * @author Winter Young
@@ -7,4 +8,8 @@ package com.github.winteryoung.yanwte2.core.spi;
  */
 public interface Combinator {
     Object invoke(Object arg);
+
+    List<Combinator> getChildren();
+
+    void setChildren(List<Combinator> children);
 }

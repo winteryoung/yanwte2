@@ -1,4 +1,4 @@
-package scripts.serviceorchestrator.testmaterial.lazycombinator;
+package scripts.lazycombinator.testmaterial;
 
 import java.util.function.Function;
 
