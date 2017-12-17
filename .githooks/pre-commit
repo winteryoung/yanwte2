@@ -1,3 +1,4 @@
 #!/bin/sh
 
+echo "pre-commit"
 ruby .githooks/pre-commit.rb
