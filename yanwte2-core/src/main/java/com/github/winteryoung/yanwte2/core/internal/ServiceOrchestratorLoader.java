@@ -9,15 +9,17 @@ import com.github.winteryoung.yanwte2.core.internal.combinators.ServiceProviderC
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.SurrogateCombinator;
 import com.github.winteryoung.yanwte2.core.utils.Lazy;
+import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.*;
-import com.google.common.reflect.ClassPath;
+import com.google.common.io.Resources;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import java.io.IOException;
-import java.util.List;
-import java.util.Set;
+import java.net.URL;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,8 +34,36 @@ import net.bytebuddy.matcher.ElementMatchers;
 public class ServiceOrchestratorLoader {
     private ServiceOrchestratorLoader() {}
 
-    private static Cache<Class<?>, Object> orchestratorCacheByType =
+    private static Cache<Class<?>, Object> orchestratorsKeyedByServiceType =
             CacheBuilder.newBuilder().build();
+
+    private static Cache<String, String> orchestratorsKeyedByServiceName =
+            CacheBuilder.newBuilder().build();
+
+    static {
+        try {
+            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+            Enumeration<URL> resources =
+                    contextClassLoader.getResources("META-INF/yanwte-orchestrators");
+            ArrayList<URL> resourceList = Collections.list(resources);
+            for (URL resource : resourceList) {
+                Resources.asByteSource(resource)
+                        .asCharSource(Charsets.UTF_8)
+                        .lines()
+                        .forEach(
+                                line -> {
+                                    Iterable<String> splits = Splitter.on('=').limit(2).split(line);
+                                    String[] kv = Iterables.toArray(splits, String.class);
+                                    if (kv.length == 2) {
+                                        orchestratorsKeyedByServiceName.put(kv[0], kv[1]);
+                                    }
+                                });
+            }
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
 
     public static <T extends Function> T getOrchestratorByServiceType(Class<T> serviceType) {
         checkNotNull(serviceType);
@@ -47,7 +77,7 @@ public class ServiceOrchestratorLoader {
         Object orchestrator;
         try {
             orchestrator =
-                    orchestratorCacheByType.get(
+                    orchestratorsKeyedByServiceType.get(
                             serviceType, () -> createOrchestratorByType(serviceType));
         } catch (UncheckedExecutionException | ExecutionException e) {
             Throwables.throwIfUnchecked(e.getCause());
@@ -180,48 +210,29 @@ public class ServiceOrchestratorLoader {
     }
 
     private static <T> ServiceOrchestrator loadUserDefinedOrchestrator(Class<T> serviceType) {
-        ImmutableSet<ClassPath.ClassInfo> classInfos;
         try {
-            classInfos =
-                    ClassPath.from(serviceType.getClassLoader())
-                            .getTopLevelClasses(serviceType.getPackage().getName());
+            ClassLoader classLoader = serviceType.getClassLoader();
 
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        String serviceTypeName = serviceType.getName();
-
-        List<String> expectedNames =
-                Lists.newArrayList(serviceTypeName, serviceTypeName + "Orchestrator");
-
-        for (ClassPath.ClassInfo classInfo : classInfos) {
-            for (String expectedName : expectedNames) {
-                if (expectedName.equals(classInfo.getName())) {
-                    Class<?> orchestratorClass = classInfo.load();
-                    if (ServiceOrchestrator.class.isAssignableFrom(orchestratorClass)) {
-                        Class<?> orchestratorImplClass;
-                        if (orchestratorClass.isInterface()) {
-                            orchestratorImplClass =
-                                    new ByteBuddy()
-                                            .subclass(orchestratorClass)
-                                            .make()
-                                            .load(orchestratorClass.getClassLoader())
-                                            .getLoaded();
-                        } else {
-                            orchestratorImplClass = orchestratorClass;
-                        }
-
-                        try {
-                            return (ServiceOrchestrator) orchestratorImplClass.newInstance();
-                        } catch (InstantiationException | IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
+            if (ServiceOrchestrator.class.isAssignableFrom(serviceType)) {
+                Class<? extends T> implClass =
+                        new ByteBuddy()
+                                .subclass(serviceType)
+                                .make()
+                                .load(classLoader)
+                                .getLoaded();
+                return (ServiceOrchestrator) implClass.newInstance();
             }
-        }
 
-        return null;
+            String orchestratorName = orchestratorsKeyedByServiceName.getIfPresent(serviceType.getName());
+            if (orchestratorName != null) {
+                Class<?> klass = classLoader.loadClass(orchestratorName);
+                return (ServiceOrchestrator) klass.newInstance();
+            }
+
+            return null;
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -36,7 +36,7 @@ public class ServiceOrchestratorTest {
     @Test(
         expectedExceptions = RuntimeException.class,
         expectedExceptionsMessageRegExp =
-                "Generic type parameter is required for orchestrator: .+?\\.Service5Orchestrator"
+                "Generic type parameter is required for orchestrator: .+?\\.Service5.*"
     )
     public void testOrchestratorWithoutGenericType() {
         Service5 service5 = ServiceOrchestrator.getOrchestrator(Service5.class);
