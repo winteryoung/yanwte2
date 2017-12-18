@@ -17,7 +17,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.*;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -40,30 +39,8 @@ public class ServiceOrchestratorLoader {
     private static Cache<String, String> orchestratorsKeyedByServiceName =
             CacheBuilder.newBuilder().build();
 
-    static {
-        try {
-            ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-            Enumeration<URL> resources =
-                    contextClassLoader.getResources("META-INF/yanwte-orchestrators");
-            ArrayList<URL> resourceList = Collections.list(resources);
-            for (URL resource : resourceList) {
-                Resources.asByteSource(resource)
-                        .asCharSource(Charsets.UTF_8)
-                        .lines()
-                        .forEach(
-                                line -> {
-                                    Iterable<String> splits = Splitter.on('=').limit(2).split(line);
-                                    String[] kv = Iterables.toArray(splits, String.class);
-                                    if (kv.length == 2) {
-                                        orchestratorsKeyedByServiceName.put(kv[0], kv[1]);
-                                    }
-                                });
-            }
-        } catch (Exception e) {
-            Throwables.throwIfUnchecked(e);
-            throw new RuntimeException(e);
-        }
-    }
+    private static Cache<ClassLoader, Boolean> knownClassLoaders =
+            CacheBuilder.newBuilder().weakKeys().build();
 
     public static <T extends Function> T getOrchestratorByServiceType(Class<T> serviceType) {
         checkNotNull(serviceType);
@@ -215,21 +192,51 @@ public class ServiceOrchestratorLoader {
 
             if (ServiceOrchestrator.class.isAssignableFrom(serviceType)) {
                 Class<? extends T> implClass =
-                        new ByteBuddy()
-                                .subclass(serviceType)
-                                .make()
-                                .load(classLoader)
-                                .getLoaded();
+                        new ByteBuddy().subclass(serviceType).make().load(classLoader).getLoaded();
                 return (ServiceOrchestrator) implClass.newInstance();
             }
 
-            String orchestratorName = orchestratorsKeyedByServiceName.getIfPresent(serviceType.getName());
+            tryLoadingYanwteOrchestrators(classLoader);
+
+            String orchestratorName =
+                    orchestratorsKeyedByServiceName.getIfPresent(serviceType.getName());
             if (orchestratorName != null) {
                 Class<?> klass = classLoader.loadClass(orchestratorName);
                 return (ServiceOrchestrator) klass.newInstance();
             }
 
             return null;
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static synchronized void tryLoadingYanwteOrchestrators(ClassLoader classLoader) {
+        try {
+            if (knownClassLoaders.getIfPresent(classLoader) != null) {
+                return;
+            } else {
+                // to prevent some rotten class loaders from keeping loading resources,
+                // we set the flag first
+                knownClassLoaders.put(classLoader, true);
+            }
+
+            Enumeration<URL> resources = classLoader.getResources("META-INF/yanwte-orchestrators");
+            ArrayList<URL> resourceList = Collections.list(resources);
+            for (URL resource : resourceList) {
+                Resources.asByteSource(resource)
+                        .asCharSource(Charsets.UTF_8)
+                        .lines()
+                        .forEach(
+                                line -> {
+                                    Iterable<String> splits = Splitter.on('=').limit(2).split(line);
+                                    String[] kv = Iterables.toArray(splits, String.class);
+                                    if (kv.length == 2) {
+                                        orchestratorsKeyedByServiceName.put(kv[0], kv[1]);
+                                    }
+                                });
+            }
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
             throw new RuntimeException(e);
