@@ -1,0 +1,6 @@
+scripts.dataext.initdataext.testmaterial.simple.ns1.DataExtInitializerImplNs1
+scripts.dataext.initdataext.testmaterial.simple.ns2.DataExtInitializerImplNs2
+scripts.dataext.initdataext.testmaterial.multiservices.n1.DataExtInitializerImplNs1
+scripts.dataext.initdataext.testmaterial.multiservices.n2.DataExtInitializerImplNs2
+scripts.dataext.friends.testmaterial.legal.ns6_1.DataExt6_1
+scripts.dataext.friends.testmaterial.illegal.ns7_1.DataExt7_1

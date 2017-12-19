@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.winteryoung.yanwte2.core.DataExtension;
 import com.github.winteryoung.yanwte2.core.DataExtensionInitializer;
+import com.github.winteryoung.yanwte2.core.ExtensibleData;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -45,7 +46,7 @@ public class DataExtensions {
     }
 
     public static Object get(
-            Object extensibleData, String providerPackage, String currentProviderPackage) {
+            ExtensibleData extensibleData, String providerPackage, String currentProviderPackage) {
         checkNotNull(extensibleData);
         checkNotNull(providerPackage);
 
@@ -75,8 +76,9 @@ public class DataExtensions {
                 }
             }
 
-            DataExtensionInitializer<Object, Object> initializer =
+            DataExtensionInitializer initializer =
                     DataExtensionInitializers.get(extensibleData, providerPackage);
+            //noinspection unchecked
             dataExtension = initializer.createDataExtension(extensibleData);
             put(extensibleData, providerPackage, dataExtension);
 

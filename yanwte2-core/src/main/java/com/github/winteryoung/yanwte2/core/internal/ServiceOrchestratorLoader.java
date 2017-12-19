@@ -10,7 +10,6 @@ import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.SurrogateCombinator;
 import com.github.winteryoung.yanwte2.core.utils.Lazy;
 import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -33,10 +32,12 @@ import net.bytebuddy.matcher.ElementMatchers;
 public class ServiceOrchestratorLoader {
     private ServiceOrchestratorLoader() {}
 
-    private static Cache<Class<?>, Object> orchestratorsKeyedByServiceType =
-            CacheBuilder.newBuilder().build();
+    private static class ServiceTypeIndexEntry {
+        Object proxy;
+        ServiceOrchestrator orchestrator;
+    }
 
-    private static Cache<String, String> orchestratorsKeyedByServiceName =
+    private static Cache<Class<?>, ServiceTypeIndexEntry> serviceTypeIndex =
             CacheBuilder.newBuilder().build();
 
     private static Cache<ClassLoader, Boolean> knownClassLoaders =
@@ -51,21 +52,20 @@ public class ServiceOrchestratorLoader {
                 Function.class.isAssignableFrom(serviceType),
                 "Service type is required to be a function: " + serviceType.getName());
 
-        Object orchestrator;
         try {
-            orchestrator =
-                    orchestratorsKeyedByServiceType.get(
-                            serviceType, () -> createOrchestratorByType(serviceType));
+            ServiceTypeIndexEntry entry =
+                    serviceTypeIndex.get(
+                            serviceType, () -> createServiceTypeIndexEntry(serviceType));
+            //noinspection unchecked
+            return (T) entry.proxy;
         } catch (UncheckedExecutionException | ExecutionException e) {
             Throwables.throwIfUnchecked(e.getCause());
             throw new RuntimeException(e.getCause());
         }
-
-        //noinspection unchecked
-        return (T) orchestrator;
     }
 
-    private static <T extends Function> T createOrchestratorByType(Class<T> serviceType) {
+    private static <T extends Function> ServiceTypeIndexEntry createServiceTypeIndexEntry(
+            Class<T> serviceType) {
         ServiceOrchestrator userDefinedOrchestrator = loadUserDefinedOrchestrator(serviceType);
         checkState(
                 userDefinedOrchestrator != null,
@@ -85,7 +85,13 @@ public class ServiceOrchestratorLoader {
                         .getLoaded();
 
         try {
-            return proxyType.newInstance();
+            T proxy = proxyType.newInstance();
+
+            ServiceTypeIndexEntry entry = new ServiceTypeIndexEntry();
+            entry.proxy = proxy;
+            entry.orchestrator = userDefinedOrchestrator;
+
+            return entry;
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
             throw new RuntimeException(e);
@@ -196,15 +202,12 @@ public class ServiceOrchestratorLoader {
                 return (ServiceOrchestrator) implClass.newInstance();
             }
 
-            tryLoadingYanwteOrchestrators(classLoader);
+            loadYanwteOrchestrators(classLoader);
 
-            String orchestratorName =
-                    orchestratorsKeyedByServiceName.getIfPresent(serviceType.getName());
-            if (orchestratorName != null) {
-                Class<?> klass = classLoader.loadClass(orchestratorName);
-                return (ServiceOrchestrator) klass.newInstance();
+            ServiceTypeIndexEntry entry = serviceTypeIndex.getIfPresent(serviceType);
+            if (entry != null) {
+                return entry.orchestrator;
             }
-
             return null;
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
@@ -212,7 +215,7 @@ public class ServiceOrchestratorLoader {
         }
     }
 
-    private static synchronized void tryLoadingYanwteOrchestrators(ClassLoader classLoader) {
+    private static synchronized void loadYanwteOrchestrators(ClassLoader classLoader) {
         try {
             if (knownClassLoaders.getIfPresent(classLoader) != null) {
                 return;
@@ -222,21 +225,30 @@ public class ServiceOrchestratorLoader {
                 knownClassLoaders.put(classLoader, true);
             }
 
-            Enumeration<URL> resources = classLoader.getResources("META-INF/yanwte-orchestrators");
+            Enumeration<URL> resources = classLoader.getResources("META-INF/yanwte/orchestrators");
             ArrayList<URL> resourceList = Collections.list(resources);
             for (URL resource : resourceList) {
                 Resources.asByteSource(resource)
                         .asCharSource(Charsets.UTF_8)
                         .lines()
-                        .forEach(
-                                line -> {
-                                    Iterable<String> splits = Splitter.on('=').limit(2).split(line);
-                                    String[] kv = Iterables.toArray(splits, String.class);
-                                    if (kv.length == 2) {
-                                        orchestratorsKeyedByServiceName.put(kv[0], kv[1]);
-                                    }
-                                });
+                        .forEach(line -> loadOrchestrator(line.trim(), classLoader));
             }
+        } catch (Exception e) {
+            Throwables.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void loadOrchestrator(String className, ClassLoader classLoader) {
+        try {
+            Class<?> klass = classLoader.loadClass(className);
+            ServiceOrchestrator orchestrator = (ServiceOrchestrator) klass.newInstance();
+
+            ServiceTypeIndexEntry entry = new ServiceTypeIndexEntry();
+            entry.orchestrator = orchestrator;
+
+            Class serviceType = orchestrator.getServiceType();
+            serviceTypeIndex.put(serviceType, entry);
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);
             throw new RuntimeException(e);

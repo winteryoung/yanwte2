@@ -17,6 +17,14 @@ import java.util.function.Function;
 public interface ServiceOrchestrator<T extends Function> {
     Combinator tree();
 
+    default Class<? extends Function> getServiceType() {
+        TypeToken<?> typeToken = new TypeToken<ServiceOrchestrator<T>>() {};
+        typeToken = typeToken.resolveType(getClass());
+        typeToken = typeToken.resolveType(ServiceOrchestrator.class.getTypeParameters()[0]);
+        //noinspection unchecked
+        return (Class) typeToken.getRawType();
+    }
+
     default Combinator provider(Class<? extends T> providerClass) {
         Class<?> parameterType = new TypeToken<T>(getClass()) {}.getRawType();
         if (parameterType == Function.class) {

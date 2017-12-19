@@ -4,6 +4,10 @@ import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 import scripts.dataext.initdataext.testmaterial.Context;
+import scripts.dataext.initdataext.testmaterial.multicontexts.Context15;
+import scripts.dataext.initdataext.testmaterial.multicontexts.Context16;
+import scripts.dataext.initdataext.testmaterial.multicontexts.Service15;
+import scripts.dataext.initdataext.testmaterial.multicontexts.Service16;
 import scripts.dataext.initdataext.testmaterial.multiservices.MultiService1;
 import scripts.dataext.initdataext.testmaterial.multiservices.MultiService2;
 import scripts.dataext.initdataext.testmaterial.multiservices.n1.DataExtN1;
@@ -59,23 +63,28 @@ public class InitDataExtTest {
         MultiService1 service1 = ServiceOrchestrator.getOrchestrator(MultiService1.class);
         service1.apply(context);
         DataExtN1 dataExtN1 =
-                context.getDataExt(
-                        "scripts.dataext.initdataext.testmaterial.multiservices.n1");
+                context.getDataExt("scripts.dataext.initdataext.testmaterial.multiservices.n1");
         Assertions.assertThat(dataExtN1.getI()).isEqualTo(4);
         DataExtN2 dataExtN2 =
-                context.getDataExt(
-                        "scripts.dataext.initdataext.testmaterial.multiservices.n2");
+                context.getDataExt("scripts.dataext.initdataext.testmaterial.multiservices.n2");
         Assertions.assertThat(dataExtN2.getI()).isEqualTo(10);
 
         MultiService2 service2 = ServiceOrchestrator.getOrchestrator(MultiService2.class);
         service2.apply(context);
-        dataExtN1 =
-                context.getDataExt(
-                        "scripts.dataext.initdataext.testmaterial.multiservices.n1");
+        dataExtN1 = context.getDataExt("scripts.dataext.initdataext.testmaterial.multiservices.n1");
         Assertions.assertThat(dataExtN1.getI()).isEqualTo(5);
-        dataExtN2 =
-                context.getDataExt(
-                        "scripts.dataext.initdataext.testmaterial.multiservices.n2");
+        dataExtN2 = context.getDataExt("scripts.dataext.initdataext.testmaterial.multiservices.n2");
         Assertions.assertThat(dataExtN2.getI()).isEqualTo(11);
+    }
+
+    @Test
+    public void testDataExtensionInitializer_multiInitializersInOneProviderPackage() {
+        Service15 service15 = ServiceOrchestrator.getOrchestrator(Service15.class);
+        String result15 = service15.apply(new Context15());
+        Assertions.assertThat(result15).isEqualTo("15");
+
+        Service16 service16 = ServiceOrchestrator.getOrchestrator(Service16.class);
+        String result16 = service16.apply(new Context16());
+        Assertions.assertThat(result16).isEqualTo("16");
     }
 }
