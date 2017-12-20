@@ -26,8 +26,8 @@ public interface ServiceOrchestrator<T extends Function> {
     }
 
     default Combinator provider(Class<? extends T> providerClass) {
-        Class<?> parameterType = new TypeToken<T>(getClass()) {}.getRawType();
-        if (parameterType == Function.class) {
+        Class<? extends Function> serviceType = getServiceType();
+        if (serviceType == Function.class) {
             throw new RuntimeException(
                     "Generic type parameter is required for orchestrator: " + getClass().getName());
         }
@@ -39,7 +39,7 @@ public interface ServiceOrchestrator<T extends Function> {
             throw new RuntimeException(e);
         }
 
-        return new ServiceProviderCombinator(providerURI);
+        return new ProviderCombinator(providerURI);
     }
 
     default Combinator chain(Combinator... combinators) {

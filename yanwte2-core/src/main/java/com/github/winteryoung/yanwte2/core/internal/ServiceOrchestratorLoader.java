@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
-import com.github.winteryoung.yanwte2.core.internal.combinators.ServiceProviderCombinator;
+import com.github.winteryoung.yanwte2.core.internal.combinators.ProviderCombinator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.core.spi.SurrogateCombinator;
 import com.github.winteryoung.yanwte2.core.utils.Lazy;
@@ -131,22 +131,22 @@ public class ServiceOrchestratorLoader {
     }
 
     private static void validate(Combinator node) {
-        Set<ServiceProviderCombinator> providerCombinators = Sets.newHashSet();
+        Set<ProviderCombinator> providerCombinators = Sets.newHashSet();
         collectServiceProviderCombinators(node, providerCombinators);
 
         // make sure one package only contains one provider for a given service type
-        Maps.uniqueIndex(providerCombinators, ServiceProviderCombinator::getProviderPackage);
+        Maps.uniqueIndex(providerCombinators, ProviderCombinator::getProviderPackage);
     }
 
     private static void collectServiceProviderCombinators(
-            Combinator node, Set<ServiceProviderCombinator> result) {
+            Combinator node, Set<ProviderCombinator> result) {
         //noinspection SuspiciousMethodCalls
         if (result.contains(node)) {
             return;
         }
 
-        if (node instanceof ServiceProviderCombinator) {
-            result.add((ServiceProviderCombinator) node);
+        if (node instanceof ProviderCombinator) {
+            result.add((ProviderCombinator) node);
         }
 
         List<Combinator> children = node.getChildren();

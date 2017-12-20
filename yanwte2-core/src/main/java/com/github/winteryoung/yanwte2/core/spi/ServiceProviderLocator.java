@@ -9,7 +9,7 @@ import java.util.function.Function;
  * @since 2017/12/10
  */
 public interface ServiceProviderLocator {
-    Function<Object, Object> getProvider(URI providerURI);
+    Function<?, ?> getProvider(URI providerURI);
 
-    Set<Function<Object, Object>> getProviders(Class<? extends Function> serviceType);
+    Set<Function> getProviders(Class<? extends Function> serviceType);
 }

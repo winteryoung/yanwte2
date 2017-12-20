@@ -35,7 +35,7 @@ public class UnnamedCombinator implements SurrogateCombinator {
         Lazy<Combinator> lazyTree = CombinatorTreeCache.getLazyTree(serviceOrchestrator);
         Combinator root = lazyTree.get();
 
-        Map<String, Function<Object, Object>> packageIndexedProviders =
+        Map<String, Function> packageIndexedProviders =
                 ServiceProviderLocators.locateAllProvidersIndexedByPackages(serviceType);
 
         Set<String> totalPackages =
@@ -53,8 +53,8 @@ public class UnnamedCombinator implements SurrogateCombinator {
                 .stream()
                 .map(
                         pkg -> {
-                            Function<Object, Object> provider = packageIndexedProviders.get(pkg);
-                            return new ServiceProviderCombinator(provider);
+                            Function<?, ?> provider = packageIndexedProviders.get(pkg);
+                            return new ProviderCombinator(provider);
                         })
                 .collect(Collectors.toList());
     }
@@ -67,9 +67,9 @@ public class UnnamedCombinator implements SurrogateCombinator {
 
         visitedNodes.add(node);
 
-        if (node instanceof ServiceProviderCombinator) {
-            ServiceProviderCombinator serviceProviderCombinator = (ServiceProviderCombinator) node;
-            namedPackages.add(serviceProviderCombinator.getProviderPackage());
+        if (node instanceof ProviderCombinator) {
+            ProviderCombinator providerCombinator = (ProviderCombinator) node;
+            namedPackages.add(providerCombinator.getProviderPackage());
         }
 
         List<Combinator> children = node.getChildren();

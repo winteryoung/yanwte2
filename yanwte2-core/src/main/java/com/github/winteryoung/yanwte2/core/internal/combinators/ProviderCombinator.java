@@ -15,16 +15,22 @@ import java.util.function.Function;
  * @author Winter Young
  * @since 2017/12/10
  */
-public class ServiceProviderCombinator implements LeafCombinator {
+public class ProviderCombinator implements LeafCombinator {
     private Function<Object, Object> provider;
     private String providerPackage;
 
-    public ServiceProviderCombinator(URI providerURI) {
-        this(ServiceProviderLocators.locateProvider(providerURI));
+    public ProviderCombinator(URI providerURI) {
+        this(findProvider(providerURI));
     }
 
-    ServiceProviderCombinator(Function<Object, Object> provider) {
-        this.provider = checkNotNull(provider);
+    private static Function<?, ?> findProvider(URI providerURI) {
+        Function<?, ?> provider = ServiceProviderLocators.locateProvider(providerURI);
+        return checkNotNull(provider, "Cannot find provider: " + providerURI);
+    }
+
+    ProviderCombinator(Function<?, ?> provider) {
+        //noinspection unchecked
+        this.provider = checkNotNull((Function) provider);
         this.providerPackage = provider.getClass().getPackage().getName();
     }
 

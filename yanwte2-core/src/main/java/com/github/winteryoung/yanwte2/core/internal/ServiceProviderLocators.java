@@ -25,11 +25,11 @@ public class ServiceProviderLocators {
         }
     }
 
-    public static Function<Object, Object> locateProvider(URI providerURI) {
+    public static Function<?, ?> locateProvider(URI providerURI) {
         checkNotNull(providerURI);
 
         for (ServiceProviderLocator serviceProviderLocator : serviceProviderLocators) {
-            Function<Object, Object> provider = serviceProviderLocator.getProvider(providerURI);
+            Function<?, ?> provider = serviceProviderLocator.getProvider(providerURI);
             if (provider != null) {
                 return provider;
             }
@@ -38,13 +38,11 @@ public class ServiceProviderLocators {
         return null;
     }
 
-    private static Set<Function<Object, Object>> locateProviders(
-            Class<? extends Function> serviceType) {
-        Set<Function<Object, Object>> providers = Sets.newHashSet();
+    private static Set<Function> locateProviders(Class<? extends Function> serviceType) {
+        Set<Function> providers = Sets.newHashSet();
 
         for (ServiceProviderLocator serviceProviderLocator : serviceProviderLocators) {
-            Set<Function<Object, Object>> _providers =
-                    serviceProviderLocator.getProviders(serviceType);
+            Set<Function> _providers = serviceProviderLocator.getProviders(serviceType);
             if (_providers != null) {
                 providers.addAll(_providers);
             }
@@ -53,9 +51,9 @@ public class ServiceProviderLocators {
         return providers;
     }
 
-    public static Map<String, Function<Object, Object>> locateAllProvidersIndexedByPackages(
+    public static Map<String, Function> locateAllProvidersIndexedByPackages(
             Class<? extends Function> serviceType) {
-        Set<Function<Object, Object>> providers = locateProviders(serviceType);
+        Set<Function> providers = locateProviders(serviceType);
         return Maps.uniqueIndex(
                 providers, provider -> checkNotNull(provider).getClass().getPackage().getName());
     }

@@ -40,6 +40,7 @@
 
     <modules>
         <module>yanwte2-core</module>
+        <module>yanwte2-spring</module>
     </modules>
 
     <build>
@@ -113,6 +114,13 @@
                 <artifactId>assertj-core</artifactId>
                 <version>3.8.0</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

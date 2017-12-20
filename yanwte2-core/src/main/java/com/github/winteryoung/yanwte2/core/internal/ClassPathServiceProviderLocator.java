@@ -15,7 +15,7 @@ import java.util.function.Function;
  */
 public class ClassPathServiceProviderLocator implements ServiceProviderLocator {
     @Override
-    public Function<Object, Object> getProvider(URI providerURI) {
+    public Function<?, ?> getProvider(URI providerURI) {
         if (!providerURI.getScheme().toLowerCase().equals("class")) {
             return null;
         }
@@ -44,7 +44,7 @@ public class ClassPathServiceProviderLocator implements ServiceProviderLocator {
 
     @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
     @Override
-    public Set<Function<Object, Object>> getProviders(Class<? extends Function> serviceType) {
+    public Set<Function> getProviders(Class<? extends Function> serviceType) {
         List<Function<Object, Object>> providers = Lists.newArrayList();
 
         synchronized (serviceType) {
