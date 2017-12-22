@@ -10,7 +10,7 @@ import scripts.unnamedcombinator.testmaterial.service9.Service9;
  * @author Winter Young
  * @since 2017/12/16
  */
-public class UnnamedCombinatorTest {
+public class UnnamedCombinatorTests {
     @Test
     public void testUnnamedCombinator_noNamedCombinator() {
         Service8 service8 = ServiceOrchestrator.getOrchestrator(Service8.class);

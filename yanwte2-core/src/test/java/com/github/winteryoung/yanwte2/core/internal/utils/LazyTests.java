@@ -1,18 +1,15 @@
-package com.github.winteryoung.yanwte2.core.utils;
+package com.github.winteryoung.yanwte2.core.internal.utils;
 
 import org.assertj.core.api.Assertions;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.testng.Assert.*;
 
 /**
  * @author Winter Young
  * @since 2017/12/17
  */
-public class LazyTest {
+public class LazyTests {
     @Test
     public void testGet_nonNullResult() {
         AtomicInteger counter = new AtomicInteger(0);

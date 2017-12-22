@@ -1,4 +1,4 @@
-package com.github.winteryoung.yanwte2.core.utils;
+package com.github.winteryoung.yanwte2.core.internal.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

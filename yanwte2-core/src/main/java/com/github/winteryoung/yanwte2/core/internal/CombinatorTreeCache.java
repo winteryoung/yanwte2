@@ -2,7 +2,7 @@ package com.github.winteryoung.yanwte2.core.internal;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
-import com.github.winteryoung.yanwte2.core.utils.Lazy;
+import com.github.winteryoung.yanwte2.core.internal.utils.Lazy;
 import com.google.common.base.Throwables;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

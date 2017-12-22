@@ -13,7 +13,7 @@ import scripts.dataext.friends.testmaterial.legal.ns6_1.DataExt6_1;
  * @author Winter Young
  * @since 2017/12/16
  */
-public class FriendDataExtTest {
+public class FriendDataExtTests {
     @Test
     public void testAccessFriendDataExt() {
         Service6 service6 = ServiceOrchestrator.getOrchestrator(Service6.class);

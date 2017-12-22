@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
  * @author Winter Young
  * @since 2017/12/13
  */
-public class ChainCombinatorTest {
+public class ChainCombinatorTests {
     @Test
     public void testShortCircuit() {
         ChainCombinator chain =

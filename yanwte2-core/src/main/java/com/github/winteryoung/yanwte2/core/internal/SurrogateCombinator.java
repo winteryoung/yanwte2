@@ -1,4 +1,7 @@
-package com.github.winteryoung.yanwte2.core.spi;
+package com.github.winteryoung.yanwte2.core.internal;
+
+import com.github.winteryoung.yanwte2.core.spi.Combinator;
+import com.github.winteryoung.yanwte2.core.spi.LeafCombinator;
 
 import java.util.List;
 

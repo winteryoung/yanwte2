@@ -10,7 +10,7 @@ import scripts.emptycombinator.testmaterial.Service12;
  * @author Winter Young
  * @since 2017/12/17
  */
-public class EmptyCombinatorTest {
+public class EmptyCombinatorTests {
     @Test(
         expectedExceptions = IllegalStateException.class,
         expectedExceptionsMessageRegExp =

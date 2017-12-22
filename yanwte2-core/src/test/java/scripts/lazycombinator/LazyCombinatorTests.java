@@ -10,7 +10,7 @@ import scripts.lazycombinator.testmaterial.Service4Orchestrator;
  * @author Winter Young
  * @since 2017/12/17
  */
-public class LazyCombinatorTest {
+public class LazyCombinatorTests {
     @Test
     public void testLazyCombinatorInvocation() {
         Service4 service4 = ServiceOrchestrator.getOrchestrator(Service4.class);

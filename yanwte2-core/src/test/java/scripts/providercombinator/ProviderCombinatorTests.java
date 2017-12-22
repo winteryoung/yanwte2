@@ -8,7 +8,7 @@ import scripts.providercombinator.testmaterial.Service11;
  * @author Winter Young
  * @since 2017/12/17
  */
-public class ProviderCombinatorTest {
+public class ProviderCombinatorTests {
     @Test(
         expectedExceptions = IllegalArgumentException.class,
         expectedExceptionsMessageRegExp = "Multiple entries with same key.+"

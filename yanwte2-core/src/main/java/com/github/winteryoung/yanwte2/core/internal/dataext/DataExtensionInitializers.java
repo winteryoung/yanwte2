@@ -5,16 +5,14 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.github.winteryoung.yanwte2.core.DataExtensionInitializer;
 import com.github.winteryoung.yanwte2.core.ExtensibleData;
-import com.google.common.base.*;
+import com.github.winteryoung.yanwte2.core.spi.DataExtensionInitializerLocator;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.*;
-import com.google.common.io.Resources;
-import com.google.common.util.concurrent.UncheckedExecutionException;
-import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -22,37 +20,58 @@ import java.util.stream.Collectors;
  * @since 2017/12/14
  */
 public class DataExtensionInitializers {
+    private static class TypeIndexKey {
+        TypeIndexKey(
+                Class<? extends ExtensibleData> hostExtensibleDataType, String providerPackage) {
+            this.hostExtensibleDataType = hostExtensibleDataType;
+            this.providerPackage = providerPackage;
+        }
+
+        Class<? extends ExtensibleData> hostExtensibleDataType;
+        String providerPackage;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TypeIndexKey that = (TypeIndexKey) o;
+            return Objects.equals(hostExtensibleDataType, that.hostExtensibleDataType)
+                    && Objects.equals(providerPackage, that.providerPackage);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(hostExtensibleDataType, providerPackage);
+        }
+
+        @Override
+        public String toString() {
+            return "TypeIndexKey{"
+                    + "hostExtensibleDataType="
+                    + hostExtensibleDataType
+                    + ", providerPackage='"
+                    + providerPackage
+                    + '\''
+                    + '}';
+        }
+    }
+
     private DataExtensionInitializers() {}
 
     private static final DataExtensionInitializer<? extends ExtensibleData, Object>
             NULL_INITIALIZER = (a) -> null;
 
-    /**
-     * Two level map. Host extensible object -> provider namespace -> data extension initializer.
-     */
-    private static Cache<Object, Map<String, DataExtensionInitializer>> mainCache =
-            CacheBuilder.newBuilder().weakKeys().build();
+    private static Cache<TypeIndexKey, DataExtensionInitializer> typeIndex =
+            CacheBuilder.newBuilder().build();
 
-    private static Multimap<String, DataExtensionInitializer> providerPackageIndex =
-            HashMultimap.create();
+    private static volatile boolean typeIndexInitialized = false;
 
-    private static Map<Class<? extends DataExtensionInitializer>, Class<? extends ExtensibleData>>
-            initializerTypeIndex = Maps.newHashMap();
+    private static List<DataExtensionInitializerLocator> locators = Lists.newArrayList();
 
-    private static void put(
-            Object extensibleData, String providerPackage, DataExtensionInitializer initializer) {
-        checkNotNull(extensibleData);
-        checkNotNull(providerPackage);
-        checkNotNull(initializer);
-
-        try {
-            Map<String, DataExtensionInitializer> secLevelMap =
-                    mainCache.get(extensibleData, ConcurrentHashMap::new);
-            //noinspection unchecked
-            secLevelMap.put(providerPackage, initializer);
-        } catch (UncheckedExecutionException | ExecutionException e) {
-            Throwables.throwIfUnchecked(e.getCause());
-            throw new RuntimeException(e.getCause());
+    static {
+        for (DataExtensionInitializerLocator locator :
+                ServiceLoader.load(DataExtensionInitializerLocator.class)) {
+            locators.add(locator);
         }
     }
 
@@ -61,87 +80,45 @@ public class DataExtensionInitializers {
         checkNotNull(extensibleData);
         checkNotNull(providerPackage);
 
-        DataExtensionInitializer<? extends ExtensibleData, Object> initializer =
-                getOrNull(extensibleData, providerPackage);
+        if (!typeIndexInitialized) {
+            initTypeIndex();
+        }
+
+        DataExtensionInitializer initializer =
+                typeIndex.getIfPresent(
+                        new TypeIndexKey(extensibleData.getClass(), providerPackage));
+
         if (initializer == null) {
-            return initInitializer(extensibleData, providerPackage);
+            return NULL_INITIALIZER;
         }
         return initializer;
     }
 
-    private static synchronized DataExtensionInitializer<?, ?> initInitializer(
-            ExtensibleData extensibleData, String providerPackage) {
-        Collection<DataExtensionInitializer> initializers =
-                providerPackageIndex.get(providerPackage);
+    private static synchronized void initTypeIndex() {
+        for (DataExtensionInitializerLocator locator : locators) {
+            Set<DataExtensionInitializer> initializers = locator.getInitializers();
 
-        if (initializers.isEmpty()) {
-            loadInitializers();
-            initializers = providerPackageIndex.get(providerPackage);
-        }
-
-        for (DataExtensionInitializer<?, ?> initializer : initializers) {
-            Class<? extends ExtensibleData> extensibleDataType =
-                    initializerTypeIndex.get(initializer.getClass());
-            if (extensibleDataType == null) {
-                return null;
-            }
-
-            if (extensibleDataType == extensibleData.getClass()) {
-                put(extensibleData, providerPackage, initializer);
-                return initializer;
+            for (DataExtensionInitializer initializer : initializers) {
+                indexInitializer(initializer);
             }
         }
 
-        put(extensibleData, providerPackage, NULL_INITIALIZER);
-        return NULL_INITIALIZER;
+        typeIndexInitialized = true;
     }
 
-    private static DataExtensionInitializer<? extends ExtensibleData, Object> getOrNull(
-            Object extensibleData, String providerPackage) {
-        try {
-            Map<String, DataExtensionInitializer> secLevelMap =
-                    mainCache.get(extensibleData, ConcurrentHashMap::new);
-            //noinspection unchecked
-            return secLevelMap.get(providerPackage);
-        } catch (UncheckedExecutionException | ExecutionException e) {
-            Throwables.throwIfUnchecked(e.getCause());
-            throw new RuntimeException(e.getCause());
-        }
-    }
-
-    private static void loadInitializers() {
-        try {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            Enumeration<URL> resources = classLoader.getResources("META-INF/yanwte/initializers");
-            ArrayList<URL> resourceList = Collections.list(resources);
-            for (URL resource : resourceList) {
-                Resources.asByteSource(resource)
-                        .asCharSource(Charsets.UTF_8)
-                        .lines()
-                        .forEach(line -> loadInitializer(line.trim(), classLoader));
-            }
-        } catch (Exception e) {
-            Throwables.throwIfUnchecked(e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static synchronized void loadInitializer(String className, ClassLoader classLoader) {
+    private static synchronized void indexInitializer(DataExtensionInitializer initializer) {
+        String className = initializer.getClass().getName();
         List<String> parts = Splitter.on(".").trimResults().splitToList(className);
 
-        String pkg;
+        String providerPackage;
         if (parts.isEmpty()) {
             return;
         } else if (parts.size() == 1) {
-            pkg = parts.get(0);
+            providerPackage = parts.get(0);
         } else {
             parts = parts.stream().limit(parts.size() - 1).collect(Collectors.toList());
-            pkg = Joiner.on(".").join(parts);
+            providerPackage = Joiner.on(".").join(parts);
         }
-
-        DataExtensionInitializer initializer =
-                (DataExtensionInitializer) newInstance(className, classLoader);
-        providerPackageIndex.put(pkg, initializer);
 
         @SuppressWarnings("unchecked")
         Class<? extends ExtensibleData> extensibleDataType = initializer.getExtensibleDataType();
@@ -150,15 +127,6 @@ public class DataExtensionInitializers {
                 extensibleDataType != ExtensibleData.class,
                 "Generic types are required for " + className);
 
-        initializerTypeIndex.put(initializer.getClass(), extensibleDataType);
-    }
-
-    private static Object newInstance(String klass, ClassLoader classLoader) {
-        try {
-            return classLoader.loadClass(klass).newInstance();
-        } catch (Exception e) {
-            Throwables.throwIfUnchecked(e);
-            throw new RuntimeException(e);
-        }
+        typeIndex.put(new TypeIndexKey(extensibleDataType, providerPackage), initializer);
     }
 }

@@ -22,7 +22,7 @@ public class DataExtensions {
 
     private static final Object NULL_DATA_EXTENSION = new Object();
 
-    /** Two level map. Host extensible object -> provider namespace -> data extension. */
+    /** Two level map. Host extensible data -> provider namespace -> data extension. */
     private static Cache<Object, ConcurrentHashMap<String, Object>> cache =
             CacheBuilder.newBuilder().weakKeys().build();
 

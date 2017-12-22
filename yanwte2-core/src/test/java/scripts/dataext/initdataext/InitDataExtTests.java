@@ -22,7 +22,7 @@ import scripts.dataext.initdataext.testmaterial.simple.ns2.DataExtInitializerImp
  * @author Winter Young
  * @since 2017/12/13
  */
-public class InitDataExtTest {
+public class InitDataExtTests {
     @Test
     public void testDataExtensionInitializer_nonNullDataExt() {
         Context context = new Context();

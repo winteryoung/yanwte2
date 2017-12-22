@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%date{ISO8601} %-5level [%thread] %logger{32} - [%X{traceId}] %message%n</Pattern>
+        </encoder>
+    </appender>
+
+    <root level="${app.log.level:-INFO}">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

@@ -10,7 +10,7 @@ import scripts.serviceorchestrator.testmaterial.simple.*;
  * @author fanshen
  * @since 2017/12/12
  */
-public class ServiceOrchestratorTest {
+public class ServiceOrchestratorTests {
     @Test
     public void getOrchestratorByServiceType_normal() {
         NormalService orchestrator = ServiceOrchestrator.getOrchestrator(NormalService.class);

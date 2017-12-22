@@ -1,5 +1,7 @@
 package com.github.winteryoung.yanwte2.spring;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.internal.combinators.ProviderCombinator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
@@ -14,10 +16,9 @@ import java.util.function.Function;
 public interface SpringServiceOrchestrator<T extends Function> extends ServiceOrchestrator<T> {
     default Combinator springProvider(String beanId) {
         Class<? extends Function> serviceType = getServiceType();
-        if (serviceType == Function.class) {
-            throw new RuntimeException(
-                    "Generic type parameter is required for orchestrator: " + getClass().getName());
-        }
+        checkState(
+                serviceType != Function.class,
+                "Generic type parameter is required for orchestrator: " + getClass().getName());
 
         URI providerURI;
         try {

@@ -1,12 +1,16 @@
 package com.github.winteryoung.yanwte2.spring.internal;
 
 import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
+import com.google.common.collect.ImmutableSet;
 import org.springframework.context.ApplicationContext;
 
 import java.net.URI;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -35,6 +39,18 @@ public class SpringServiceProviderLocator implements ServiceProviderLocator {
 
     @Override
     public Set<Function> getProviders(Class<? extends Function> serviceType) {
-        return null;
+        checkNotNull(serviceType);
+
+        ApplicationContext applicationContext = SpringHook.getApplicationContext();
+        checkState(applicationContext != null);
+
+        Map<String, ? extends Function> beansOfType = applicationContext.getBeansOfType(serviceType);
+
+        if (beansOfType != null && !beansOfType.isEmpty()) {
+            Collection<? extends Function> beans = beansOfType.values();
+            return ImmutableSet.copyOf(beans);
+        }
+
+        return ImmutableSet.of();
     }
 }

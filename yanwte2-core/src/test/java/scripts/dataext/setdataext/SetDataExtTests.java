@@ -11,7 +11,7 @@ import scripts.dataext.setdataext.testmaterial.Service2;
  * @author Winter Young
  * @since 2017/12/13
  */
-public class SetDataExtTest {
+public class SetDataExtTests {
     @Test
     public void testGettingDataExtension() {
         Context context = new Context();
