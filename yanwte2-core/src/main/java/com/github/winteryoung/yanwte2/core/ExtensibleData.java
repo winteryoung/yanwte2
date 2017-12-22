@@ -16,8 +16,8 @@ public interface ExtensibleData {
         DataExtensions.put(this, CurrentThreadProviderPackage.get(), extension);
     }
 
+    @SuppressWarnings("unchecked")
     default <T> T getDataExt(String providerPackage) {
-        //noinspection unchecked
         return (T) DataExtensions.get(this, providerPackage, CurrentThreadProviderPackage.get());
     }
 }

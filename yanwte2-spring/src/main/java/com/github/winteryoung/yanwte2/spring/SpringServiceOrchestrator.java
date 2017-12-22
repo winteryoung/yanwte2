@@ -13,11 +13,11 @@ import java.util.function.Function;
  * @author fanshen
  * @since 2017/12/20
  */
-public interface SpringServiceOrchestrator<T extends Function> extends ServiceOrchestrator<T> {
+public interface SpringServiceOrchestrator<T extends Function<?, ?>> extends ServiceOrchestrator<T> {
     default Combinator springProvider(String beanId) {
-        Class<? extends Function> serviceType = getServiceType();
+        Class<? extends Function<?, ?>> serviceType = getServiceType();
         checkState(
-                serviceType != Function.class,
+                !Function.class.equals(serviceType),
                 "Generic type parameter is required for orchestrator: " + getClass().getName());
 
         URI providerURI;

@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
  * @since 2017/12/16
  */
 public class UnnamedCombinator implements SurrogateCombinator {
-    private ServiceOrchestrator<? extends Function> serviceOrchestrator;
-    private Class<? extends Function> serviceType;
+    private ServiceOrchestrator<? extends Function<?, ?>> serviceOrchestrator;
+    private Class<? extends Function<?, ?>> serviceType;
 
     public UnnamedCombinator(
-            ServiceOrchestrator<? extends Function> serviceOrchestrator,
-            Class<? extends Function> serviceType) {
+            ServiceOrchestrator<? extends Function<?, ?>> serviceOrchestrator,
+            Class<? extends Function<?, ?>> serviceType) {
         this.serviceOrchestrator = checkNotNull(serviceOrchestrator);
         this.serviceType = checkNotNull(serviceType);
     }
@@ -35,7 +35,7 @@ public class UnnamedCombinator implements SurrogateCombinator {
         Lazy<Combinator> lazyTree = CombinatorTreeCache.getLazyTree(serviceOrchestrator);
         Combinator root = lazyTree.get();
 
-        Map<String, Function> packageIndexedProviders =
+        Map<String, Function<?, ?>> packageIndexedProviders =
                 ServiceProviderLocators.locateAllProvidersIndexedByPackages(serviceType);
 
         Set<String> totalPackages =

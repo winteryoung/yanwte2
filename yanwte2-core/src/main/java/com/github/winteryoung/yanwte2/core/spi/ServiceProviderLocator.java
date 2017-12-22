@@ -11,5 +11,5 @@ import java.util.function.Function;
 public interface ServiceProviderLocator {
     Function<?, ?> getProvider(URI providerURI);
 
-    Set<Function> getProviders(Class<? extends Function> serviceType);
+    Set<Function<?, ?>> getProviders(Class<? extends Function<?, ?>> serviceType);
 }

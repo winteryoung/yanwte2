@@ -14,20 +14,22 @@ import java.util.function.Function;
  * @author Winter Young
  * @since 2017/12/10
  */
-public interface ServiceOrchestrator<T extends Function> {
+public interface ServiceOrchestrator<T extends Function<?, ?>> {
     Combinator tree();
 
-    default Class<? extends Function> getServiceType() {
-        TypeToken<?> typeToken = new TypeToken<ServiceOrchestrator<T>>() {};
+    @SuppressWarnings("unchecked")
+    default Class<? extends Function<?, ?>> getServiceType() {
+        TypeToken<?> typeToken = new TypeToken<ServiceOrchestrator<T>>() {
+            private static final long serialVersionUID = -4811029877591669034L;
+        };
         typeToken = typeToken.resolveType(getClass());
         typeToken = typeToken.resolveType(ServiceOrchestrator.class.getTypeParameters()[0]);
-        //noinspection unchecked
         return (Class) typeToken.getRawType();
     }
 
     default Combinator provider(Class<? extends T> providerClass) {
-        Class<? extends Function> serviceType = getServiceType();
-        if (serviceType == Function.class) {
+        Class<? extends Function<?, ?>> serviceType = getServiceType();
+        if (Function.class.equals(serviceType)) {
             throw new RuntimeException(
                     "Generic type parameter is required for orchestrator: " + getClass().getName());
         }
@@ -53,7 +55,9 @@ public interface ServiceOrchestrator<T extends Function> {
 
     @SuppressWarnings("unchecked")
     default Combinator unnamed() {
-        Class<? super T> parameterType = new TypeToken<T>(getClass()) {}.getRawType();
+        Class<? super T> parameterType = new TypeToken<T>(getClass()) {
+            private static final long serialVersionUID = 2794153935323127741L;
+        }.getRawType();
         return new UnnamedCombinator(this, (Class) parameterType);
     }
 
@@ -61,7 +65,7 @@ public interface ServiceOrchestrator<T extends Function> {
         return new EmptyCombinator();
     }
 
-    static <T extends Function> T getOrchestrator(Class<T> serviceType) {
+    static <T extends Function<?, ?>> T getOrchestrator(Class<T> serviceType) {
         return ServiceOrchestratorLoader.getOrchestratorByServiceType(serviceType);
     }
 }

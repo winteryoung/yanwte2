@@ -1,6 +1,7 @@
 package com.github.winteryoung.yanwte2.spring.internal;
 
 import com.github.winteryoung.yanwte2.core.DataExtensionInitializer;
+import com.github.winteryoung.yanwte2.core.ExtensibleData;
 import com.github.winteryoung.yanwte2.core.spi.DataExtensionInitializerLocator;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
@@ -14,12 +15,14 @@ import org.springframework.context.ApplicationContext;
  */
 public class SpringDataExtensionInitializerLocator implements DataExtensionInitializerLocator {
     @Override
-    public Set<DataExtensionInitializer> getInitializers() {
+    public Set<DataExtensionInitializer<ExtensibleData, ?>> getInitializers() {
         ApplicationContext applicationContext = SpringHook.getApplicationContext();
-        Map<String, DataExtensionInitializer> beansOfType =
-                applicationContext.getBeansOfType(DataExtensionInitializer.class);
+        @SuppressWarnings("unchecked")
+        Map<String, DataExtensionInitializer<ExtensibleData, ?>> beansOfType =
+                (Map) applicationContext.getBeansOfType(DataExtensionInitializer.class);
         if (beansOfType != null) {
-            Collection<DataExtensionInitializer> initializers = beansOfType.values();
+            Collection<DataExtensionInitializer<ExtensibleData, ?>> initializers =
+                    beansOfType.values();
             return ImmutableSet.copyOf(initializers);
         }
         return ImmutableSet.of();

@@ -1,17 +1,16 @@
 package com.github.winteryoung.yanwte2.spring.internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.github.winteryoung.yanwte2.core.spi.ServiceProviderLocator;
 import com.google.common.collect.ImmutableSet;
-import org.springframework.context.ApplicationContext;
-
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author fanshen
@@ -38,16 +37,18 @@ public class SpringServiceProviderLocator implements ServiceProviderLocator {
     }
 
     @Override
-    public Set<Function> getProviders(Class<? extends Function> serviceType) {
+    public Set<Function<?, ?>> getProviders(Class<? extends Function<?, ?>> serviceType) {
         checkNotNull(serviceType);
 
         ApplicationContext applicationContext = SpringHook.getApplicationContext();
         checkState(applicationContext != null);
 
-        Map<String, ? extends Function> beansOfType = applicationContext.getBeansOfType(serviceType);
+        @SuppressWarnings("unchecked")
+        Map<String, Function<?, ?>> beansOfType =
+                (Map) applicationContext.getBeansOfType(serviceType);
 
         if (beansOfType != null && !beansOfType.isEmpty()) {
-            Collection<? extends Function> beans = beansOfType.values();
+            Collection<? extends Function<?, ?>> beans = beansOfType.values();
             return ImmutableSet.copyOf(beans);
         }
 

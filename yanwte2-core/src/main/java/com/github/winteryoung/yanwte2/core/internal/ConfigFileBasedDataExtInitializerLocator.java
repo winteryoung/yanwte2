@@ -19,15 +19,16 @@ import java.util.stream.Collectors;
  */
 public class ConfigFileBasedDataExtInitializerLocator implements DataExtensionInitializerLocator {
     @Override
-    public Set<DataExtensionInitializer> getInitializers() {
+    public Set<DataExtensionInitializer<ExtensibleData, ?>> getInitializers() {
         try {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             Enumeration<URL> resources = classLoader.getResources("META-INF/yanwte/initializers");
             ArrayList<URL> resourceList = Collections.list(resources);
-            ImmutableSet.Builder<DataExtensionInitializer> initializers = ImmutableSet.builder();
+            ImmutableSet.Builder<DataExtensionInitializer<ExtensibleData, ?>> initializers =
+                    ImmutableSet.builder();
 
             for (URL resource : resourceList) {
-                Set<DataExtensionInitializer> _initializers =
+                Set<DataExtensionInitializer<ExtensibleData, ?>> _initializers =
                         Resources.asByteSource(resource)
                                 .asCharSource(Charsets.UTF_8)
                                 .lines()
@@ -44,9 +45,10 @@ public class ConfigFileBasedDataExtInitializerLocator implements DataExtensionIn
         }
     }
 
-    private static synchronized DataExtensionInitializer loadInitializer(
+    private static synchronized DataExtensionInitializer<ExtensibleData, ?> loadInitializer(
             String className, ClassLoader classLoader) {
-        DataExtensionInitializer initializer =
+        @SuppressWarnings("unchecked")
+        DataExtensionInitializer<ExtensibleData, ?> initializer =
                 (DataExtensionInitializer) newInstance(className, classLoader);
 
         @SuppressWarnings("unchecked")

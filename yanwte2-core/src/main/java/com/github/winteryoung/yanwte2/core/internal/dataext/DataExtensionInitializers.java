@@ -58,10 +58,10 @@ public class DataExtensionInitializers {
 
     private DataExtensionInitializers() {}
 
-    private static final DataExtensionInitializer<? extends ExtensibleData, Object>
-            NULL_INITIALIZER = (a) -> null;
+    private static final DataExtensionInitializer<ExtensibleData, Object> NULL_INITIALIZER =
+            (a) -> null;
 
-    private static Cache<TypeIndexKey, DataExtensionInitializer> typeIndex =
+    private static Cache<TypeIndexKey, DataExtensionInitializer<ExtensibleData, ?>> typeIndex =
             CacheBuilder.newBuilder().build();
 
     private static volatile boolean typeIndexInitialized = false;
@@ -75,7 +75,7 @@ public class DataExtensionInitializers {
         }
     }
 
-    public static DataExtensionInitializer get(
+    public static DataExtensionInitializer<ExtensibleData, ?> get(
             ExtensibleData extensibleData, String providerPackage) {
         checkNotNull(extensibleData);
         checkNotNull(providerPackage);
@@ -84,7 +84,7 @@ public class DataExtensionInitializers {
             initTypeIndex();
         }
 
-        DataExtensionInitializer initializer =
+        DataExtensionInitializer<ExtensibleData, ?> initializer =
                 typeIndex.getIfPresent(
                         new TypeIndexKey(extensibleData.getClass(), providerPackage));
 
@@ -96,9 +96,9 @@ public class DataExtensionInitializers {
 
     private static synchronized void initTypeIndex() {
         for (DataExtensionInitializerLocator locator : locators) {
-            Set<DataExtensionInitializer> initializers = locator.getInitializers();
+            Set<DataExtensionInitializer<ExtensibleData, ?>> initializers = locator.getInitializers();
 
-            for (DataExtensionInitializer initializer : initializers) {
+            for (DataExtensionInitializer<ExtensibleData, ?> initializer : initializers) {
                 indexInitializer(initializer);
             }
         }
@@ -106,7 +106,8 @@ public class DataExtensionInitializers {
         typeIndexInitialized = true;
     }
 
-    private static synchronized void indexInitializer(DataExtensionInitializer initializer) {
+    private static synchronized void indexInitializer(
+            DataExtensionInitializer<ExtensibleData, ?> initializer) {
         String className = initializer.getClass().getName();
         List<String> parts = Splitter.on(".").trimResults().splitToList(className);
 

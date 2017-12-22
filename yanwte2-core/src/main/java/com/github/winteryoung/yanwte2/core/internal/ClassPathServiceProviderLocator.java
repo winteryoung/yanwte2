@@ -35,20 +35,19 @@ public class ClassPathServiceProviderLocator implements ServiceProviderLocator {
         }
 
         try {
-            //noinspection unchecked
-            return (Function<Object, Object>) providerClass.newInstance();
+            return (Function<?, ?>) providerClass.newInstance();
         } catch (IllegalAccessException | InstantiationException e) {
             throw new RuntimeException(e);
         }
     }
 
-    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
+    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
     @Override
-    public Set<Function> getProviders(Class<? extends Function> serviceType) {
-        List<Function<Object, Object>> providers = Lists.newArrayList();
+    public Set<Function<?, ?>> getProviders(Class<? extends Function<?, ?>> serviceType) {
+        List<Function<?, ?>> providers = Lists.newArrayList();
 
         synchronized (serviceType) {
-            for (Function provider : ServiceLoader.load(serviceType)) {
+            for (Function<?, ?> provider : ServiceLoader.load(serviceType)) {
                 providers.add(provider);
             }
         }

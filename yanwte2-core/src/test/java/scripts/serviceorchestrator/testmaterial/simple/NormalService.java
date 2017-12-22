@@ -10,7 +10,7 @@ import java.util.function.Function;
  * @author fanshen
  * @since 2017/12/11
  */
-public interface NormalService extends Function<Integer, Integer>, ServiceOrchestrator {
+public interface NormalService extends Function<Integer, Integer>, ServiceOrchestrator<NormalService> {
     @Override
     default Combinator tree() {
         return (LeafCombinator) arg -> (Integer) arg + 3;

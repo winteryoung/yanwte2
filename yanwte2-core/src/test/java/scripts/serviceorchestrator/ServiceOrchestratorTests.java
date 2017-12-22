@@ -3,7 +3,6 @@ package scripts.serviceorchestrator;
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
-import scripts.serviceorchestrator.testmaterial.orchestratorwithoutgenerictype.Service5;
 import scripts.serviceorchestrator.testmaterial.simple.*;
 
 /**
@@ -31,15 +30,5 @@ public class ServiceOrchestratorTests {
         SimpleService simpleService = ServiceOrchestrator.getOrchestrator(SimpleService.class);
         String result = simpleService.apply("test");
         Assertions.assertThat(result).isEqualTo("test-abc");
-    }
-
-    @Test(
-        expectedExceptions = RuntimeException.class,
-        expectedExceptionsMessageRegExp =
-                "Generic type parameter is required for orchestrator: .+?\\.Service5.*"
-    )
-    public void testOrchestratorWithoutGenericType() {
-        Service5 service5 = ServiceOrchestrator.getOrchestrator(Service5.class);
-        service5.apply("");
     }
 }

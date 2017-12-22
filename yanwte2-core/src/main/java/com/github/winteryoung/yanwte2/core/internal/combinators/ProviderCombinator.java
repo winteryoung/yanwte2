@@ -16,7 +16,7 @@ import java.util.function.Function;
  * @since 2017/12/10
  */
 public class ProviderCombinator implements LeafCombinator {
-    private Function<Object, Object> provider;
+    private Function<? super Object, ?> provider;
     private String providerPackage;
 
     public ProviderCombinator(URI providerURI) {
@@ -28,8 +28,8 @@ public class ProviderCombinator implements LeafCombinator {
         return checkNotNull(provider, "Cannot find provider: " + providerURI);
     }
 
+    @SuppressWarnings("unchecked")
     ProviderCombinator(Function<?, ?> provider) {
-        //noinspection unchecked
         this.provider = checkNotNull((Function) provider);
         this.providerPackage = provider.getClass().getPackage().getName();
     }

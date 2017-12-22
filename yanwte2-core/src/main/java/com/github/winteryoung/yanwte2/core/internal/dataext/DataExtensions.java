@@ -45,6 +45,7 @@ public class DataExtensions {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static Object get(
             ExtensibleData extensibleData, String providerPackage, String currentProviderPackage) {
         checkNotNull(extensibleData);
@@ -76,9 +77,8 @@ public class DataExtensions {
                 }
             }
 
-            DataExtensionInitializer initializer =
+            DataExtensionInitializer<? super ExtensibleData, ?> initializer =
                     DataExtensionInitializers.get(extensibleData, providerPackage);
-            //noinspection unchecked
             dataExtension = initializer.createDataExtension(extensibleData);
             put(extensibleData, providerPackage, dataExtension);
 

@@ -38,11 +38,11 @@ public class ServiceProviderLocators {
         return null;
     }
 
-    private static Set<Function> locateProviders(Class<? extends Function> serviceType) {
-        Set<Function> providers = Sets.newHashSet();
+    private static Set<Function<?, ?>> locateProviders(Class<? extends Function<?, ?>> serviceType) {
+        Set<Function<?, ?>> providers = Sets.newHashSet();
 
         for (ServiceProviderLocator serviceProviderLocator : serviceProviderLocators) {
-            Set<Function> _providers = serviceProviderLocator.getProviders(serviceType);
+            Set<Function<?, ?>> _providers = serviceProviderLocator.getProviders(serviceType);
             if (_providers != null) {
                 providers.addAll(_providers);
             }
@@ -51,9 +51,9 @@ public class ServiceProviderLocators {
         return providers;
     }
 
-    public static Map<String, Function> locateAllProvidersIndexedByPackages(
-            Class<? extends Function> serviceType) {
-        Set<Function> providers = locateProviders(serviceType);
+    public static Map<String, Function<?, ?>> locateAllProvidersIndexedByPackages(
+            Class<? extends Function<?, ?>> serviceType) {
+        Set<Function<?, ?>> providers = locateProviders(serviceType);
         return Maps.uniqueIndex(
                 providers, provider -> checkNotNull(provider).getClass().getPackage().getName());
     }

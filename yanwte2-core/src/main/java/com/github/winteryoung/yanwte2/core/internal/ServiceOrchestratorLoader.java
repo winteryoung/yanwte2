@@ -33,7 +33,7 @@ public class ServiceOrchestratorLoader {
 
     private static class ServiceTypeIndexEntry {
         Object proxy;
-        ServiceOrchestrator orchestrator;
+        ServiceOrchestrator<?> orchestrator;
     }
 
     private static Cache<Class<?>, ServiceTypeIndexEntry> serviceTypeIndex =
@@ -42,7 +42,8 @@ public class ServiceOrchestratorLoader {
     private static Cache<ClassLoader, Boolean> knownClassLoaders =
             CacheBuilder.newBuilder().weakKeys().build();
 
-    public static <T extends Function> T getOrchestratorByServiceType(Class<T> serviceType) {
+    @SuppressWarnings("unchecked")
+    public static <T extends Function<?, ?>> T getOrchestratorByServiceType(Class<T> serviceType) {
         checkNotNull(serviceType);
         checkArgument(
                 serviceType.isInterface(),
@@ -55,7 +56,6 @@ public class ServiceOrchestratorLoader {
             ServiceTypeIndexEntry entry =
                     serviceTypeIndex.get(
                             serviceType, () -> createServiceTypeIndexEntry(serviceType));
-            //noinspection unchecked
             return (T) entry.proxy;
         } catch (UncheckedExecutionException | ExecutionException e) {
             Throwables.throwIfUnchecked(e.getCause());
@@ -63,9 +63,9 @@ public class ServiceOrchestratorLoader {
         }
     }
 
-    private static <T extends Function> ServiceTypeIndexEntry createServiceTypeIndexEntry(
+    private static <T extends Function<?, ?>> ServiceTypeIndexEntry createServiceTypeIndexEntry(
             Class<T> serviceType) {
-        ServiceOrchestrator userDefinedOrchestrator = loadUserDefinedOrchestrator(serviceType);
+        ServiceOrchestrator<?> userDefinedOrchestrator = loadUserDefinedOrchestrator(serviceType);
         checkState(
                 userDefinedOrchestrator != null,
                 "Cannot find orchestrator for service: " + serviceType.getName());
@@ -98,7 +98,7 @@ public class ServiceOrchestratorLoader {
     }
 
     private static OrchestratorInterceptor createInterceptor(
-            Lazy<Combinator> lazyTree, ServiceOrchestrator serviceOrchestrator) {
+            Lazy<Combinator> lazyTree, ServiceOrchestrator<?> serviceOrchestrator) {
         Lazy<Combinator> lazyExpandedTree =
                 Lazy.of(
                         () -> {
@@ -191,7 +191,7 @@ public class ServiceOrchestratorLoader {
         combinator.setChildren(children);
     }
 
-    private static <T> ServiceOrchestrator loadUserDefinedOrchestrator(Class<T> serviceType) {
+    private static <T> ServiceOrchestrator<?> loadUserDefinedOrchestrator(Class<T> serviceType) {
         try {
             ClassLoader classLoader = serviceType.getClassLoader();
 
@@ -241,12 +241,12 @@ public class ServiceOrchestratorLoader {
     private static void loadOrchestrator(String className, ClassLoader classLoader) {
         try {
             Class<?> klass = classLoader.loadClass(className);
-            ServiceOrchestrator orchestrator = (ServiceOrchestrator) klass.newInstance();
+            ServiceOrchestrator<?> orchestrator = (ServiceOrchestrator<?>) klass.newInstance();
 
             ServiceTypeIndexEntry entry = new ServiceTypeIndexEntry();
             entry.orchestrator = orchestrator;
 
-            Class serviceType = orchestrator.getServiceType();
+            Class<? extends Function<?, ?>> serviceType = orchestrator.getServiceType();
             serviceTypeIndex.put(serviceType, entry);
         } catch (Exception e) {
             Throwables.throwIfUnchecked(e);

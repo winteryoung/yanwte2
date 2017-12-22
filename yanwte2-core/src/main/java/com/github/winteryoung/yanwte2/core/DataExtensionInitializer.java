@@ -9,11 +9,14 @@ import com.google.common.reflect.TypeToken;
 public interface DataExtensionInitializer<ED extends ExtensibleData, DataExtension> {
     DataExtension createDataExtension(ED extensibleData);
 
-    default Class<? extends ExtensibleData> getExtensibleDataType() {
-        TypeToken<?> typeToken = new TypeToken<DataExtensionInitializer<ED, DataExtension>>() {};
+    @SuppressWarnings("unchecked")
+    default Class<ED> getExtensibleDataType() {
+        TypeToken<?> typeToken =
+                new TypeToken<DataExtensionInitializer<ED, DataExtension>>() {
+                    private static final long serialVersionUID = 4639419131976092626L;
+                };
         typeToken = typeToken.resolveType(getClass());
         typeToken = typeToken.resolveType(DataExtensionInitializer.class.getTypeParameters()[0]);
-        //noinspection unchecked
         return (Class) typeToken.getRawType();
     }
 }
