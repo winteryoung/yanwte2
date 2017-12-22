@@ -168,6 +168,7 @@
                         </executions>
                         <configuration>
                             <keyname>352869B6</keyname>
+                            <executable>gpg2</executable>
                         </configuration>
                     </plugin>
                     <plugin>
