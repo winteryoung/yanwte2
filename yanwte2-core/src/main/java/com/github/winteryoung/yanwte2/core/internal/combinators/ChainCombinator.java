@@ -38,4 +38,9 @@ public class ChainCombinator implements Combinator {
     public void setChildren(List<Combinator> children) {
         combinators = ImmutableList.copyOf(children);
     }
+
+    @Override
+    public String getName() {
+        return "chain";
+    }
 }

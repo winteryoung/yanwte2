@@ -47,7 +47,7 @@ public class UnnamedCombinator implements SurrogateCombinator {
 
         Set<String> namedPackages = Sets.newHashSet();
         Set<Combinator> visitedNodes = Sets.newHashSet();
-        depthFirstTraverse(root, visitedNodes, namedPackages);
+        findNamedPackages(root, visitedNodes, namedPackages);
 
         return Sets.difference(totalPackages, namedPackages)
                 .stream()
@@ -59,7 +59,7 @@ public class UnnamedCombinator implements SurrogateCombinator {
                 .collect(Collectors.toList());
     }
 
-    private void depthFirstTraverse(
+    private void findNamedPackages(
             Combinator node, Set<Combinator> visitedNodes, Set<String> namedPackages) {
         if (visitedNodes.contains(node)) {
             return;
@@ -78,7 +78,7 @@ public class UnnamedCombinator implements SurrogateCombinator {
         }
 
         for (Combinator child : children) {
-            depthFirstTraverse(child, visitedNodes, namedPackages);
+            findNamedPackages(child, visitedNodes, namedPackages);
         }
     }
 }

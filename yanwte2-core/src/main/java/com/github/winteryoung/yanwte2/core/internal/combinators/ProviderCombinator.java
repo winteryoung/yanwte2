@@ -54,6 +54,11 @@ public class ProviderCombinator implements LeafCombinator {
     }
 
     @Override
+    public String getName() {
+        return provider.getClass().getName();
+    }
+
+    @Override
     public String toString() {
         return provider.getClass().getName();
     }

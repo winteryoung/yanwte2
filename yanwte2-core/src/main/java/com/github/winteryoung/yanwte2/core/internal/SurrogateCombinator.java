@@ -15,5 +15,10 @@ public interface SurrogateCombinator extends LeafCombinator {
         return null;
     }
 
+    @Override
+    default String getName() {
+        return null;
+    }
+
     List<Combinator> getSurrogateCombinators();
 }

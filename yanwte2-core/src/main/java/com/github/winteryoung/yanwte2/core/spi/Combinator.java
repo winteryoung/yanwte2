@@ -12,4 +12,6 @@ public interface Combinator {
     List<Combinator> getChildren();
 
     void setChildren(List<Combinator> children);
+
+    String getName();
 }

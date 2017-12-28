@@ -11,4 +11,9 @@ public class EmptyCombinator implements LeafCombinator {
     public Object invoke(Object arg) {
         return null;
     }
+
+    @Override
+    public String getName() {
+        return "empty";
+    }
 }

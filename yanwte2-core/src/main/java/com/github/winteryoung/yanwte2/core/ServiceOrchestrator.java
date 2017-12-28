@@ -1,12 +1,14 @@
 package com.github.winteryoung.yanwte2.core;
 
 import com.github.winteryoung.yanwte2.core.internal.ServiceOrchestratorLoader;
+import com.github.winteryoung.yanwte2.core.internal.ServiceOrchestrators;
 import com.github.winteryoung.yanwte2.core.internal.combinators.*;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
@@ -15,13 +17,28 @@ import java.util.function.Function;
  * @since 2017/12/10
  */
 public interface ServiceOrchestrator<T extends Function<?, ?>> {
+    interface Node {
+        String getName();
+
+        List<Node> getChildren();
+    }
+
+    static <T extends Function<?, ?>> T getOrchestrator(Class<T> serviceType) {
+        return ServiceOrchestratorLoader.getOrchestratorByServiceType(serviceType);
+    }
+
     Combinator tree();
+
+    default Node getExpandedTree() {
+        return ServiceOrchestrators.getExpandedTree(this);
+    }
 
     @SuppressWarnings("unchecked")
     default Class<? extends Function<?, ?>> getServiceType() {
-        TypeToken<?> typeToken = new TypeToken<ServiceOrchestrator<T>>() {
-            private static final long serialVersionUID = -4811029877591669034L;
-        };
+        TypeToken<?> typeToken =
+                new TypeToken<ServiceOrchestrator<T>>() {
+                    private static final long serialVersionUID = -4811029877591669034L;
+                };
         typeToken = typeToken.resolveType(getClass());
         typeToken = typeToken.resolveType(ServiceOrchestrator.class.getTypeParameters()[0]);
         return (Class) typeToken.getRawType();
@@ -55,17 +72,14 @@ public interface ServiceOrchestrator<T extends Function<?, ?>> {
 
     @SuppressWarnings("unchecked")
     default Combinator unnamed() {
-        Class<? super T> parameterType = new TypeToken<T>(getClass()) {
-            private static final long serialVersionUID = 2794153935323127741L;
-        }.getRawType();
+        Class<? super T> parameterType =
+                new TypeToken<T>(getClass()) {
+                    private static final long serialVersionUID = 2794153935323127741L;
+                }.getRawType();
         return new UnnamedCombinator(this, (Class) parameterType);
     }
 
     default Combinator empty() {
         return new EmptyCombinator();
-    }
-
-    static <T extends Function<?, ?>> T getOrchestrator(Class<T> serviceType) {
-        return ServiceOrchestratorLoader.getOrchestratorByServiceType(serviceType);
     }
 }

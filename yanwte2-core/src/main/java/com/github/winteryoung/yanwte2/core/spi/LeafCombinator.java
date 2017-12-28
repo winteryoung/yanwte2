@@ -15,4 +15,9 @@ public interface LeafCombinator extends Combinator {
 
     @Override
     default void setChildren(List<Combinator> children) {}
+
+    @Override
+    default String getName() {
+        return "dynamic";
+    }
 }
