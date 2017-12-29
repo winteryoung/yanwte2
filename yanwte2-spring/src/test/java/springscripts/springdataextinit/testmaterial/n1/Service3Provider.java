@@ -1,8 +1,8 @@
-package scripts.springdataextinit.testmaterial.n1;
+package springscripts.springdataextinit.testmaterial.n1;
 
 import org.springframework.stereotype.Service;
-import scripts.springdataextinit.testmaterial.Context3;
-import scripts.springdataextinit.testmaterial.Service3;
+import springscripts.springdataextinit.testmaterial.Context3;
+import springscripts.springdataextinit.testmaterial.Service3;
 
 /**
  * @author fanshen

@@ -1,4 +1,4 @@
-package scripts.springdataextinit.testmaterial.n1;
+package springscripts.springdataextinit.testmaterial.n1;
 
 /**
  * @author fanshen

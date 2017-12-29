@@ -1,4 +1,4 @@
-package scripts.restcombinator.testmaterial;
+package springscripts.unnamedcombinator.testmaterial;
 
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.spring.SpringServiceOrchestrator;

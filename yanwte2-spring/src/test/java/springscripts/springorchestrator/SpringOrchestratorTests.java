@@ -1,10 +1,10 @@
-package scripts.springorchestrator;
+package springscripts.springorchestrator;
 
 import base.TestBase;
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
-import scripts.springorchestrator.testmaterial.Service1;
+import springscripts.springorchestrator.testmaterial.Service1;
 
 /**
  * @author fanshen

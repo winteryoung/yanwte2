@@ -1,4 +1,4 @@
-package scripts;
+package springscripts;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

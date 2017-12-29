@@ -1,4 +1,4 @@
-package scripts.springorchestrator.testmaterial;
+package springscripts.springorchestrator.testmaterial;
 
 import org.springframework.stereotype.Service;
 

@@ -1,4 +1,4 @@
-package scripts.springdataextinit.testmaterial;
+package springscripts.springdataextinit.testmaterial;
 
 import com.github.winteryoung.yanwte2.core.ExtensibleData;
 

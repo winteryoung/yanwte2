@@ -17,6 +17,7 @@ import java.util.function.Function;
  * @since 2017/12/10
  */
 public interface ServiceOrchestrator<T extends Function<?, ?>> {
+    @SuppressWarnings("unused")
     interface Node {
         String getName();
 

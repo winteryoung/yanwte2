@@ -1,7 +1,7 @@
-package scripts.restcombinator.testmaterial.n1;
+package springscripts.unnamedcombinator.testmaterial.n1;
 
 import org.springframework.stereotype.Service;
-import scripts.restcombinator.testmaterial.Service2;
+import springscripts.unnamedcombinator.testmaterial.Service2;
 
 /**
  * @author fanshen
