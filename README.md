@@ -31,6 +31,12 @@ Maven:
 </dependency>
 ```
 
+### Demo
+
+The demo project illustrates a typical scenario, showing how to use Yanwte2 in a spring boot project.
+
+https://github.com/winteryoung/yanwte2/tree/master/yanwte2-demo 
+
 ## PERFORMANCE
 
 ## HOW-TO GUIDE
@@ -38,3 +44,25 @@ Maven:
 ### Standard combinators
 
 ### Unnamed combinator
+
+### Custom combinators
+
+### Spring integration
+
+### Intercepting provider execution
+
+### Data extensions
+
+### Building your plugin system
+
+## HISTORY
+
+Yanwte came out of the need from the inside of Alibaba inc., the trading department. It's online trading systems are using the framework called tradespi, which is the predecessor of Yanwte. 3 years since the inception of tradespi, I felt it's time to rewrite it and open-source it to the community, so that we can share a mature thought of how to extend a complex program to everyone.
+
+After open-sourced our trading systems inside the corporation, the systems could deliver 60+ bug fixes/features a week. The biggest system of them, could deliver 20+ bug fixes/features per week.
+
+## YANWTE V.S. YANWTE2
+
+Yanwte2 rewrites Yanwte completely. The benefit is light. Both in the library itself and the way you use it. There's no startup process. Due to the constraint of the startup process, Yanwte can only be used in terminal applications, not in libraries. But Yanwte2 can be used both in applications and libraries.
+
+Yanwte2 uses the Java standard `Function` interface to represent a SPI. This design decision greatly reduced the need for byte code instrumentation. And the depth of the call stack has been greatly reduced too. This improves the performance.
