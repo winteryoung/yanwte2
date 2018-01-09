@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
  * @author Winter Young
  * @since 2016/10/23
  */
-@Service("eventNumberFormatter")
+@Service("evenNumberFormatter")
 public class EvenNumberFormatter implements NumberFormatter {
     @Override
     public String apply(Integer num) {
         if (num != null && num % 2 == 0) {
-            return "Even " + num;
+            return "Even " + num + "\n";
         }
         return null;
     }

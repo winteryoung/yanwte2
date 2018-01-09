@@ -1,6 +1,6 @@
-package scripts.unnamedcombinator.testmaterial.service9.n2;
+package scripts.dynamicprovidercombinator.testmaterial.service9.n2;
 
-import scripts.unnamedcombinator.testmaterial.service9.Service9;
+import scripts.dynamicprovidercombinator.testmaterial.service9.Service9;
 
 /**
  * @author Winter Young

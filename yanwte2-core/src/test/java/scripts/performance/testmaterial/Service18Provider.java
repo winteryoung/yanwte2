@@ -7,6 +7,7 @@ package scripts.performance.testmaterial;
 public class Service18Provider implements Service18 {
     @Override
     public String apply(String s) {
+        System.currentTimeMillis();
         return s;
     }
 }

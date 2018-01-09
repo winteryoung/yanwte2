@@ -1,9 +1,9 @@
-package scripts.unnamedcombinator.testmaterial.service9;
+package scripts.dynamicprovidercombinator.testmaterial.service9;
 
 import com.github.winteryoung.yanwte2.core.ServiceOrchestrator;
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import java.util.function.Function;
-import scripts.unnamedcombinator.testmaterial.service9.n1.Service9Provider1;
+import scripts.dynamicprovidercombinator.testmaterial.service9.n1.Service9Provider1;
 
 /**
  * @author Winter Young
@@ -13,6 +13,6 @@ public interface Service9 extends Function<String, String>, ServiceOrchestrator<
     @Override
     default Combinator tree() {
         return mapReduce(
-                (String a, String b) -> a + b, provider(Service9Provider1.class), unnamed());
+                (String a, String b) -> a + b, provider(Service9Provider1.class), dynamicProviders());
     }
 }

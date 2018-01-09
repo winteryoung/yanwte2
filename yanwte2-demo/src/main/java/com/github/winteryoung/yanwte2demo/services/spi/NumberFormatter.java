@@ -12,6 +12,6 @@ public interface NumberFormatter
         extends Function<Integer, String>, SpringServiceOrchestrator<NumberFormatter> {
     @Override
     default Combinator tree() {
-        return chain(springProvider("oddNumberFormatter"), springProvider("eventNumberFormatter"));
+        return chain(springProvider("evenNumberFormatter"), springProvider("oddNumberFormatter"));
     }
 }

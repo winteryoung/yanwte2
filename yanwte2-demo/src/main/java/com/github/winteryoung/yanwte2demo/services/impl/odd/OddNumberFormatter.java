@@ -12,7 +12,7 @@ public class OddNumberFormatter implements NumberFormatter {
     @Override
     public String apply(Integer num) {
         if (num != null && num % 2 != 0) {
-            return "Odd " + num;
+            return "Odd " + num + "\n";
         }
         return null;
     }

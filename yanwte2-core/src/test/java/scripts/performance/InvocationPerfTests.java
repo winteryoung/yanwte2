@@ -24,13 +24,13 @@ public class InvocationPerfTests {
                         () -> ServiceOrchestrator.getOrchestrator(Service18.class),
                         service18 -> service18.apply(null));
 
-        Assertions.assertThat(result).isLessThan(base * 15);
+        Assertions.assertThat(result).isLessThan(base * 10);
     }
 
     private <T> long run(Supplier<T> serviceSupplier, Consumer<T> serviceConsumer) {
         T service = serviceSupplier.get();
         LocalTime start = LocalTime.now();
-        for (int i = 0; i < 100_000_000; i++) {
+        for (int i = 0; i < 10_000_000; i++) {
             serviceConsumer.accept(service);
         }
         LocalTime end = LocalTime.now();

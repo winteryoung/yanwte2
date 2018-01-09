@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
  * @author Winter Young
  * @since 2017/12/16
  */
-public class UnnamedCombinator implements SurrogateCombinator {
+public class DynamicProviderCombinator implements SurrogateCombinator {
     private ServiceOrchestrator<? extends Function<?, ?>> serviceOrchestrator;
     private Class<? extends Function<?, ?>> serviceType;
 
-    public UnnamedCombinator(
+    public DynamicProviderCombinator(
             ServiceOrchestrator<? extends Function<?, ?>> serviceOrchestrator,
             Class<? extends Function<?, ?>> serviceType) {
         this.serviceOrchestrator = checkNotNull(serviceOrchestrator);

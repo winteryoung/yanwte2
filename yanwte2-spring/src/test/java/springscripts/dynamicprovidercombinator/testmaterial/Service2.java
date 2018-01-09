@@ -1,4 +1,4 @@
-package springscripts.unnamedcombinator.testmaterial;
+package springscripts.dynamicprovidercombinator.testmaterial;
 
 import com.github.winteryoung.yanwte2.core.spi.Combinator;
 import com.github.winteryoung.yanwte2.spring.SpringServiceOrchestrator;
@@ -14,6 +14,6 @@ public interface Service2 extends Function<String, String>, SpringServiceOrchest
     default Combinator tree() {
         return mapReduce((String s1, String s2) -> s1 + s2,
                 springProvider("service2Provider1"),
-                unnamed());
+                dynamicProviders());
     }
 }

@@ -72,12 +72,12 @@ public interface ServiceOrchestrator<T extends Function<?, ?>> {
     }
 
     @SuppressWarnings("unchecked")
-    default Combinator unnamed() {
+    default Combinator dynamicProviders() {
         Class<? super T> parameterType =
                 new TypeToken<T>(getClass()) {
                     private static final long serialVersionUID = 2794153935323127741L;
                 }.getRawType();
-        return new UnnamedCombinator(this, (Class) parameterType);
+        return new DynamicProviderCombinator(this, (Class) parameterType);
     }
 
     default Combinator empty() {

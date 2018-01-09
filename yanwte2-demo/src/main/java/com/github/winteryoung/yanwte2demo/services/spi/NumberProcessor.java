@@ -12,6 +12,6 @@ public interface NumberProcessor
         extends Function<Integer, Integer>, SpringServiceOrchestrator<NumberProcessor> {
     @Override
     default Combinator tree() {
-        return chain(springProvider("oddNumberProcessor"), springProvider("eventNumberProcessor"));
+        return chain(dynamicProviders());
     }
 }

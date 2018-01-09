@@ -1,7 +1,7 @@
-package springscripts.unnamedcombinator.testmaterial.n2;
+package springscripts.dynamicprovidercombinator.testmaterial.n2;
 
 import org.springframework.stereotype.Service;
-import springscripts.unnamedcombinator.testmaterial.Service2;
+import springscripts.dynamicprovidercombinator.testmaterial.Service2;
 
 /**
  * @author fanshen

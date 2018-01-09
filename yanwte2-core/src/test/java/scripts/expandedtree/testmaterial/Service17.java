@@ -18,6 +18,6 @@ public interface Service17 extends Function<String, String>, ServiceOrchestrator
                         provider(Service17Provider2.class),
                         provider(Service17Provider3.class)),
                 provider(Service17Provider3.class),
-                unnamed());
+                dynamicProviders());
     }
 }
