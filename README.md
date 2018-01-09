@@ -159,7 +159,7 @@ https://github.com/winteryoung/yanwte2/tree/master/yanwte2-demo
 
 Service orchestrators are generated dynamically using byte code instrumentation. They are essentially proxies that delegate calls to the combinator tree. It's 5 times faster than reflection. However, still much slower than regular method calls. Currently the byte code instrumentation is done via ByteBuddy, which involves creating a class instance each time an invocation occur. The performance could be improved by hand written those byte code. If you have the need, leave an issue.
 
-## HOW-TO GUIDE
+## REFERENCES
 
 ### Standard combinators
 
