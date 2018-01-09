@@ -151,31 +151,121 @@ Now the pattern emerges, the odd series form a plugin and the even series form a
 
 Non-spring projects are supported, but undocumented. If you have the need, leave an issue.
 
-### Demo
-
-The demo project illustrates a typical scenario, showing how to use Yanwte2 in a spring boot project.
+The above example can be found here:
 
 https://github.com/winteryoung/yanwte2/tree/master/yanwte2-demo
 
 ## PERFORMANCE
 
+Service orchestrators are generated dynamically using byte code instrumentation. They are essentially proxies that delegate calls to the combinator tree. It's 5 times faster than reflection. However, still much slower than regular method calls. Currently the byte code instrumentation is done via ByteBuddy, which involves creating a class instance each time an invocation occur. The performance could be improved by hand written those byte code. If you have the need, leave an issue.
+
 ## HOW-TO GUIDE
 
 ### Standard combinators
 
-### Unnamed combinator
+Standard combinators include the following:
+
+* `provider`
+  Accepts an argument of the class of the provider. Providers constructed this way must have a parameter-less constructor, and cannot have dependency injection.
+* `springProvider`
+  Accepts an string specifying the name of the provider bean. You can explicitly specify the name of the bean like `@Service("mybean")`, and use it like `springProvider("mybean")`. Providers constructed this way can have dependency injection.
+* `dynamic`
+  The above methods introduce a way to statically specify which provider to use. If you are building a plugin system, you won't know the exact providers that will be registered later. `dynamic` combinator will be expanded into a list of providers at runtime. One consequence is that `dynamic` combinator cannot be used at the root of the tree. Because it's unclear what you want to with the multiple results returned by the providers.
+* `chain`
+  As demonstrated above, `chain` returns the result of the first child that returns non-null. It has the effect of short-circuit. Thus it pretty much the chain of responsibility. If no child returns null, `chain` acts like foreach.
+* `mapReduce`
+  Accepts a series of combinators and a function to specify how to combine the results returned by the combinators. The request is broadcasted to all the combinators sequentially.
+  
+The combinator system is recursive. It's possible to build a multi-level tree like the following:
+
+```
+mapReduce((String a, String b) -> a + b,
+  chain(
+    springProvider("bean1"),
+    dynamicProviders()
+  ),
+  springProvider("bean2")  
+)
+```
 
 ### Custom combinators
 
+How ever the standard combinators can be limited if your program is extremely complex. For example, if you want a `decorate` combinator. You can implement one.
+
+```java
+class DecorateCombinator implements Combinator {
+    ...
+}
+```
+
+```java
+interface CustomServiceOrchestrator extends SpringServiceOrchestrator {
+    Combinator <R> decorate(Function<R, R> function, Combinator... combinators) {
+        return new DecorateCombinator(function, combinators);
+    }
+}
+```
+
+Inherit from your `CustomServiceOrchestrator` instead of `SpringServiceOrchestrator`. Now you can use the `decorate` combinator.
+
 ### Debugging
 
-### Spring integration
+When using the dynamic combinator, it's possible that you are not surely which providers are loaded in which order. `com.github.winteryoung.yanwte2.core.ServiceOrchestrator.getExpandedTree` can be used to dynamically retrieve this information.
 
 ### Intercepting provider execution
 
+Currently there's only one way: define your base class for every providers in your application. If you need the callback API, leave an issue. This can be useful to do universal logging.
+
 ### Data extensions
 
-### Building your plugin system
+If the program is complex enough, you may need a context to flow around the SPIs (as a parameter). Different plugins may need different extensions to the context. For example, in a e-commerce system, an order can be viewed as the context. An e-book order may have some extra fields, and a order of a chair may be some other extra fields.
+
+```java
+class Order implements ExtensibleData { ... }
+```
+```java
+class EbookOrder { ... }
+```
+```java
+class ChairOrder { ... }
+```
+
+There's no inheritance relationship. We use composition. You can get your data extension from the context in your provider. For example,
+
+```java
+class EbookOrderProcessor implements OrderProcessor {
+    @Override
+    public Void apply(Order order) {
+        EbookOrder ebookOrder = order.getDataExt();
+        // do something with ebookOrder
+        return null;
+    }
+}
+```
+
+Where did `ebookOrder` come from? We can set the instance via `order.setDataExt()` in some other providers, or we can define a data extension initializer.
+
+Set data extension directly:
+
+```java
+class EbookOrderPreProcessor implements OrderPreProcessor {
+    @Override
+    public Void apply(Order order) {
+        order.setDataExt(new EbookOrder());
+    }
+}
+```
+
+Initialize data extension via initializer:
+
+```java
+class EbookOrderInitializer implements DataExtensionInitializer<Order, EbookOrder> {
+    @Override
+    public EbookOrder createDataExtension(Order order) {
+        return new EbookOrder();
+    }
+}
+```
 
 ## HISTORY
 
