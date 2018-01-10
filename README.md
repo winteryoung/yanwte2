@@ -27,7 +27,7 @@ Maven:
 <dependency>
     <groupId>com.github.winteryoung</groupId>
     <artifactId>yanwte2-spring</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 

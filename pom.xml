@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.winteryoung</groupId>
     <artifactId>yanwte2</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
     <description>A library to help extending your programs.</description>

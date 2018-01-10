@@ -17,7 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jdk.version>1.8</jdk.version>
-        <yanwte2.version>1.0.0-SNAPSHOT</yanwte2.version>
+        <yanwte2.version>1.0.0</yanwte2.version>
     </properties>
 
     <dependencies>
