@@ -218,7 +218,7 @@ Currently there's only one way: define your base class for every providers in yo
 
 ### Data extensions
 
-If the program is complex enough, you may need a context to flow around the SPIs (as a parameter). Different plugins may need different extensions to the context. For example, in a e-commerce system, an order can be viewed as the context. An e-book order may have some extra fields, and a order of a chair may be some other extra fields.
+If the program is complex enough, you may need a context to flow around the SPIs (as a parameter). Different plugins may need different extensions to the context. For example, in a e-commerce system, an order can be viewed as the context. An e-book order may have some extra fields, and a order of a chair may has some other extra fields.
 
 ```java
 class Order implements ExtensibleData { ... }
