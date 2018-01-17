@@ -210,7 +210,7 @@ Inherit from your `CustomServiceOrchestrator` instead of `SpringServiceOrchestra
 
 ### Debugging
 
-When using the dynamic combinator, it's possible that you are not surely which providers are loaded in which order. `com.github.winteryoung.yanwte2.core.ServiceOrchestrator.getExpandedTree` can be used to dynamically retrieve this information.
+When using the dynamic combinator, it's possible that you are not sure which providers are loaded in which order. `com.github.winteryoung.yanwte2.core.ServiceOrchestrator.getExpandedTree` can be used to dynamically retrieve this information.
 
 ### Intercepting provider execution
 
