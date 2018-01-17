@@ -10,15 +10,15 @@ Apache license 2.0. You are free to use in any which way.
 
 Briefly, Yanwte2 is a way to use SPI (Service Provider Interface). The standard Java method to use a SPI is to use `ServiceLoader` to get an enumeration of the providers.
 
- The problem with that is you don't know what to do with the providers. There must be some relations between them. Are they mutually exclusive? Can they be used together? If so, how to combine their results?
+The problem with that is you don't know what to do with the providers. There must be some relations between them. Are they mutually exclusive? Can they be used together? If so, how to combine their results?
  
- Yanwte2's solution to this problem is to define a tree to orchestrate those providers. There are two important relation types: chain and map reduce. They are expressed as nodes in the orchestrator tree.
+Yanwte2's solution to this problem is to define a tree to orchestrate those providers. There are two important relation types: chain and map reduce. They are expressed as nodes in the orchestrator tree.
  
- A chain node is like a chain of responsibilities. Any provider in the chain can decide when to break the chain. This node basically says the providers are mutually exclusive. Or if no provider breaks the chain, the the chain expresses the characteristics of a foreach loop.
+A chain node is like a chain of responsibilities. Any provider in the chain can decide when to break the chain. This node basically says the providers are mutually exclusive. Or if no provider breaks the chain, the the chain expresses the characteristics of a foreach loop.
  
- A map reduce node, as the name suggests, accepts a list of providers, and a reduce function, to produce a result. It basically says the providers can coexist. But you need to coordinate their results.
+A map reduce node, as the name suggests, accepts a list of providers, and a reduce function, to produce a result. It basically says the providers can coexist, but you need to coordinate their results.
  
- Based on this basic feature, Yanwte2 can provide a standard way to build a plugin.
+Based on this basic feature, Yanwte2 can provide a standard way to build a plugin. Yanwte2 can be used both in applications and libraries.
 
 ## QUICK START
 
@@ -57,7 +57,7 @@ These two interfaces both accept dynamic providers that can be found at runtime.
 
 The providers are organized in a chain node. That way, any provider can decide if it can handle the input and breaks the chain. It's essentially a chain of responsibilities. We will discuss more on combinators later.
 
-Put aside the providers, first we will see how to use the interfaces.
+Put aside the providers, let's see how to use the interfaces.
 
 ```java
 @RestController
@@ -108,7 +108,7 @@ public class EvenNumberFormatter implements NumberFormatter {
 
 With the Spring `@Service` annotation, these providers are registered as Spring beans. So that you can inject any dependencies from the Spring container.
 
-The processor cannot process odd numbers. So when encountered odd numbers, it returns `null`. `null` is special value that tells the chain combinator to proceed to the next one, that it cannot handle the current request.
+The processor cannot process odd numbers. So when encountered odd numbers, it returns `null`. `null` is a special value that tells the chain combinator to proceed to the next one.
 
 Now start the application (the default server port is 8080) and test the URL:
 
@@ -147,9 +147,9 @@ public class OddNumberFormatter implements NumberFormatter {
 }
 ```
 
-Now the pattern emerges, the odd series form a plugin and the even series form another plugin. We can just package each provider series into separate projects. The provider discovery mechanism depends on Spring.
+Now the pattern emerges, the odd series form a plugin and the even series form another plugin. We can just package each provider series into separate projects or JARs.
 
-Non-spring projects are supported, but undocumented. If you have the need, leave an issue.
+This provider discovery mechanism depends on Spring. Non-spring projects are supported, but undocumented. If you have the need, leave an issue.
 
 The above example can be found here:
 
@@ -157,7 +157,7 @@ https://github.com/winteryoung/yanwte2/tree/master/yanwte2-demo
 
 ## PERFORMANCE
 
-Service orchestrators are generated dynamically using byte code instrumentation. They are essentially proxies that delegate calls to the combinator tree. It's 5 times faster than reflection. However, still much slower than regular method calls. Currently the byte code instrumentation is done via ByteBuddy, which involves creating a class instance each time an invocation occur. The performance could be improved by hand written those byte code. If you have the need, leave an issue.
+Service orchestrators are generated dynamically using byte code instrumentation. They are essentially proxies that delegate calls to combinator trees. It's 5 times faster than reflection. However, still much slower than regular method calls. Currently the byte code instrumentation is done via ByteBuddy, which involves creating a class instance each time an invocation occurs. The performance could be improved by hand writing those byte code. If you have the need, leave an issue.
 
 ## REFERENCES
 
@@ -169,13 +169,13 @@ Standard combinators include the following:
   Accepts an argument of the class of the provider. Providers constructed this way must have a parameter-less constructor, and cannot have dependency injection.
 * `springProvider`
   Accepts an string specifying the name of the provider bean. You can explicitly specify the name of the bean like `@Service("mybean")`, and use it like `springProvider("mybean")`. Providers constructed this way can have dependency injection.
-* `dynamic`
-  The above methods introduce a way to statically specify which provider to use. If you are building a plugin system, you won't know the exact providers that will be registered later. `dynamic` combinator will be expanded into a list of providers at runtime. One consequence is that `dynamic` combinator cannot be used at the root of the tree. Because it's unclear what you want to with the multiple results returned by the providers.
+* `dynamicProviders`
+  The above methods introduce a way to statically specify which provider to use. If you are building a plugin system, you won't know the exact providers that will be registered later. `dynamicProviders` combinator will be expanded into a list of providers at runtime. One consequence is that `dynamicProviders` combinator cannot be used at the root of the tree. Because it's unclear what you want to do with the multiple results returned by the providers.
 * `chain`
-  As demonstrated above, `chain` returns the result of the first child that returns non-null. It has the effect of short-circuit. Thus it pretty much the chain of responsibility. If no child returns null, `chain` acts like foreach.
+  As demonstrated above, `chain` returns the result of the first child that returns non-null. It has the effect of short-circuit. Thus it's pretty much like the chain of responsibility. If no child returns `null`, `chain` acts like foreach.
 * `mapReduce`
-  Accepts a series of combinators and a function to specify how to combine the results returned by the combinators. The request is broadcasted to all the combinators sequentially.
-  
+  Accepts a series of combinators and a function to specify how to combine the results returned by the combinators. The request will be broadcasted to all the combinators sequentially.
+
 The combinator system is recursive. It's possible to build a multi-level tree like the following:
 
 ```
@@ -190,7 +190,7 @@ mapReduce((String a, String b) -> a + b,
 
 ### Custom combinators
 
-How ever the standard combinators can be limited if your program is extremely complex. For example, if you want a `decorate` combinator. You can implement one.
+The standard combinators can be limited if your program is extremely complex. The following code demonstrates how to implement a `decorate` combinator.
 
 ```java
 class DecorateCombinator implements Combinator {
@@ -218,7 +218,7 @@ Currently there's only one way: define your base class for every providers in yo
 
 ### Data extensions
 
-If the program is complex enough, you may need a context to flow around the SPIs (as a parameter). Different plugins may need different extensions to the context. For example, in a e-commerce system, an order can be viewed as the context. An e-book order may have some extra fields, and a order of a chair may has some other extra fields.
+If the program is complex enough, you may need a context to flow around the SPIs (as a parameter). Different plugins may need different extensions to the context. For example, in a e-commerce system, an order can be viewed as the context. An e-book order may have some extra fields, and a order of a chair may have some other extra fields.
 
 ```java
 class Order implements ExtensibleData { ... }
@@ -275,6 +275,6 @@ After open-sourced our trading systems inside the corporation, the systems could
 
 ## YANWTE V.S. YANWTE2
 
-Yanwte2 rewrites Yanwte completely. The benefit is light. Both in the library itself and the way you use it. There's no startup process. Due to the constraint of the startup process, Yanwte can only be used in terminal applications, not in libraries. But Yanwte2 can be used both in applications and libraries.
+Yanwte2 rewrites Yanwte completely. The benefit is light. Both in the library itself and the way you use it. Simplified design brings more robustness. It's more reliable.
 
 Yanwte2 uses the Java standard `Function` interface to represent a SPI. This design decision greatly reduced the need for byte code instrumentation. And the depth of the call stack has been greatly reduced too. This improves the performance.
