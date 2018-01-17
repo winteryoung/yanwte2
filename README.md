@@ -214,7 +214,7 @@ When using the dynamic combinator, it's possible that you are not sure which pro
 
 ### Intercepting provider execution
 
-Currently there's only one way: define your base class for every providers in your application. If you need the callback API, leave an issue. This can be useful to do universal logging.
+Currently there's only one way: define your base class for every providers in your application. If you need the callback API, leave an issue. This can be useful in implementing universal logging.
 
 ### Data extensions
 
